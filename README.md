@@ -1,3 +1,3 @@
-# mcav1
+# Multisensor Calibration and Visualization (MCaV)
 
-Test pull requests
+For detailed documentation, please visit the [wiki page](https://github.com/ryanlin/mcav/wiki).
