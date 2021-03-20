@@ -24,15 +24,24 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: 3.8
+
+    - uses: actions/cache@v2
+      with:
+        path: ${{ env.pythonLocation }}
+        key: ${{ env.pythonLocation }}-${{ hashFiles('Backend/calibration_service/requirements.txt') }}
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install pytest
         pip install -r Backend/calibration_service/requirements.txt
+
   test-calibration-service:
     needs: install-dependencies
     runs-on: ubuntu-18.04
     steps:
+    - uses: actions/checkout@v2
+    
     - name: Test calibration service
       run: |
         export PYTHONPATH=Backend/calibration_service/
