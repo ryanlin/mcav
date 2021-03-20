@@ -16,7 +16,7 @@ on:
     - '.github/workflows/test_calibration_service.yml'
 
 jobs:
-  build:
+  validate-calibration-service:
     runs-on: ubuntu-latest
     
     steps:
