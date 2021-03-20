@@ -24,7 +24,6 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: 3.8
-
     - uses: actions/cache@v2
       with:
         path: ${{ env.pythonLocation }}
@@ -41,7 +40,11 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@v2
-    
+    - uses: actions/cache@v2
+      with:
+        path: ${{ env.pythonLocation }}
+        key: ${{ env.pythonLocation }}-${{ hashFiles('Backend/calibration_service/requirements.txt') }}
+
     - name: Test calibration service
       run: |
         export PYTHONPATH=Backend/calibration_service/
