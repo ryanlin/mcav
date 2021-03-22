@@ -100,7 +100,6 @@ def test_gps_lidar_egomotion_size(gps_motion_covariance, lidar_motion_covariance
 
 
 @pytest.fixture
-@pytest.mark.filterwarnings("ignore:::cvxpy")
 def calibration_result(gps_motion_covariance, lidar_motion_covariance):
     T_gps, cov_gps = gps_motion_covariance
     T_lidar, cov_lidar = lidar_motion_covariance
