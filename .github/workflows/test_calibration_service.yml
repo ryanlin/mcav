@@ -52,4 +52,4 @@ jobs:
     - name: Test calibration service
       run: |
         export PYTHONPATH=Backend/calibration_service/
-        pytest
+        pytest --rootdir=Back/end/calibration_service
