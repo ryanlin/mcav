@@ -6,10 +6,8 @@ from .utils import construct_P
 
 def calibrate(Ta: np.ndarray,
               Tb: np.ndarray,
-              cov_a: Optional[np.ndarray] = None,
-              cov_b: Optional[np.ndarray] = None,
-              start_point: Optional[int] = None,
-              end_point: Optional[int] = None,
+              cov_a: np.ndarray,
+              cov_b: np.ndarray,
               rh_cons: bool = True,
               row_orthog_cons: bool = True,
               col_orthog_cons: bool = True) -> Tuple[np.ndarray, np.ndarray, bool]:
@@ -26,18 +24,16 @@ def calibrate(Ta: np.ndarray,
     :param col_orthog_cons: column orthogonality constraint
     :return: calibrated rotation (3 x 3), translation (3 x 1), and status (boolean)
     """
-    Ta = Ta[start_point: end_point]
-    Tb = Tb[start_point: end_point]
+    assert len(Ta) == len(Tb) == len(cov_a) == len(cov_b) > 0
+    assert Ta.shape == Tb.shape
+    assert Ta[0].shape == (4, 4)
+    assert cov_a.shape == cov_b.shape
+    assert cov_a[0].shape == (6, 6)
 
     Ra = Ta[:, 0:3, 0:3].copy()
     ta = Ta[:, 0:3, 3].copy()
     Rb = Tb[:, 0:3, 0:3].copy()
     tb = Tb[:, 0:3, 3].copy()
-
-    if cov_a is not None:
-        cov_a = cov_a[start_point: end_point].copy()
-    if cov_b is not None:
-        cov_b = cov_b[start_point: end_point].copy()
 
     Mr = __construct_Mr(Ra, Rb)
     Mt = __construct_Mt(ta, Rb, tb)
