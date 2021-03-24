@@ -3,7 +3,10 @@ from.skew_symmetric import skew_symmetric
 
 
 def exp(omega_u: np.ndarray):
-    """Returns SE(3) as a matrix on a manifold"""
+    """Returns SE(3) as a matrix on a manifold
+
+    omega_u: (angular, linear)
+    """
     assert omega_u.shape == (6,)
 
     omega = omega_u[0:3]

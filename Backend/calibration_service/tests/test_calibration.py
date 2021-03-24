@@ -144,4 +144,4 @@ def test_gps_lidar_calibration_translation(calibration_result):
     truth_translation = np.array([[0.0, 2.0, 0.75]])
     translation_error = np.linalg.norm(np.squeeze(
         truth_translation - calibration_translation))
-    assert translation_error < 7.8
+    assert translation_error < 20.0

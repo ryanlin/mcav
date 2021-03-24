@@ -1,6 +1,3 @@
-# This workflow will install Python dependencies, run tests and lint with a single version of Python
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
-
 name: Validate Calibration Service
 
 on:
@@ -24,17 +21,20 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: 3.8
-    - uses: actions/cache@v2
+    - name: Cache Packages
+      id: cache-packages
+      uses: actions/cache@v2
       with:
         path: ${{ env.pythonLocation }}
         key: ${{ env.pythonLocation }}-packages-${{ hashFiles('Backend/calibration_service/requirements.txt') }}
 
     - name: Install dependencies
+      if: steps.cache-packages.outputs.cache-hit != 'true'
       run: |
         python -m pip install --upgrade pip
         pip install pytest pytest-dependency
         pip install -r Backend/calibration_service/requirements.txt
-
+  
   test-calibration-service:
     needs: install-dependencies
     runs-on: ubuntu-18.04
@@ -52,4 +52,4 @@ jobs:
     - name: Test calibration service
       run: |
         export PYTHONPATH=Backend/calibration_service/
-        pytest --rootdir=Backend/calibration_service
+        pytest --rootdir=Backend/calibration_service/

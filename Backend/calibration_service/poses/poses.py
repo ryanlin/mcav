@@ -1,7 +1,7 @@
 from .utils import parse_bag
 from .utils.lie_groups import SE3
 from .utils.lie_groups import SO3
-from .utils import interpolate_poses
+from .utils import interpolate_timestamps_poses_covariances
 from .utils import compute_motion
 from .utils import compute_motion_covariance
 import numpy as np
@@ -108,7 +108,7 @@ class Poses:
 
         Return the resulting interpolated timestamp.
         """
-        self.timestamps, self.poses, self.covariances = interpolate_poses(
+        self.timestamps, self.poses, self.covariances = interpolate_timestamps_poses_covariances(
             timestamp_target, self.timestamps, self.poses, self.covariances)
         return self.timestamps.copy()
 
