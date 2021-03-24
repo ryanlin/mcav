@@ -4,10 +4,11 @@ import numpy as np
 from typing import Optional, Tuple
 
 
-def interpolate_poses(timestamp_target: np.ndarray,
-                      timestamp_interp: np.ndarray,
-                      poses: np.ndarray,
-                      covariances: Optional[np.ndarray] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+# TODO (eduong@nevada.unr.edu): write automated test for this function
+def interpolate_timestamps_poses_covariances(timestamp_target: np.ndarray,
+                                             timestamp_interp: np.ndarray,
+                                             poses: np.ndarray,
+                                             covariances: Optional[np.ndarray] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Interpolate pose transforms and convariances by comparing timestamps.
 
     Returns interpolated timestamp, poses, and convariances
@@ -49,7 +50,7 @@ def interpolate_poses(timestamp_target: np.ndarray,
                 interp_j_cov = covariances[j]
 
                 interp_covariances.append(
-                    __interpolate_covariances(interp_i_cov, interp_j_cov, t))
+                    __interpolate_covariance(interp_i_cov, interp_j_cov, t))
 
             interp_timestamp.append(timestamp_target[h])
             h += 1
@@ -75,7 +76,7 @@ def __interpolate_pose(pose1: np.ndarray, pose2: np.ndarray, t: float) -> np.nda
     return pose1 @ se3.exp(t * SE3.log(SE3.inverse(pose1) @ pose2))
 
 
-def __interpolate_covariances(cov1: np.ndarray, cov2: np.ndarray, t: float) -> np.ndarray:
+def __interpolate_covariance(cov1: np.ndarray, cov2: np.ndarray, t: float) -> np.ndarray:
     assert type(cov1) is type(cov2)
     assert t >= 0.0 and t <= 1.0
 
