@@ -34,33 +34,9 @@ jobs:
         python -m pip install --upgrade pip
         pip install pytest pytest-dependency
         pip install -r Backend/calibration_service/requirements.txt
-        
-  test-interpolation:
-    needs: install-dependencies
-    runs-on: ubuntu-18.04
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.8
-    - uses: actions/cache@v2
-      with:
-        path: ${{ env.pythonLocation }}
-        key: ${{ env.pythonLocation }}-packages-${{ hashFiles('Backend/calibration_service/requirements.txt') }}
-
-    - name: Test lie groups library
-      run: |
-        export PYTHONPATH=Backend/calibration_service/
-        pytest --rootdir=Backend/calibration_service/ Backend/calibration_service/tests/test_lie_groups.py
-        
-    - name: Test interpolation functions library
-      run: |
-        export PYTHONPATH=Backend/calibration_service/
-        pytest --rootdir=Backend/calibration_service/ Backend/calibration_service/tests/test_interpolation.py
   
   test-calibration-service:
-    needs: test-interpolation
+    needs: install-dependencies
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@v2
@@ -76,4 +52,4 @@ jobs:
     - name: Test calibration service
       run: |
         export PYTHONPATH=Backend/calibration_service/
-        pytest --rootdir=Backend/calibration_service/ Backend/calibration_service/tests/test_calibration.py
+        pytest --rootdir=Backend/calibration_service/
