@@ -72,22 +72,3 @@ jobs:
       run: |
         export PYTHONPATH=Backend/calibration_service/
         pytest --rootdir=Backend/calibration_service/ Backend/calibration_service/tests/component
-
-  integration-tests:
-    needs: component-tests
-    runs-on: ubuntu-18.04
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.8
-    - uses: actions/cache@v2
-      with:
-        path: ${{ env.pythonLocation }}
-        key: ${{ env.pythonLocation }}-packages-${{ hashFiles('Backend/calibration_service/requirements.txt') }}
-
-    - name: Integration tests
-      run: |
-        export PYTHONPATH=Backend/calibration_service/
-        pytest --rootdir=Backend/calibration_service/ Backend/calibration_service/tests/integration
