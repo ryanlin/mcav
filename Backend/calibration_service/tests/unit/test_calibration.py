@@ -111,7 +111,7 @@ def add_noise_covariance(cov, noise):
     ])
 
 
-testNoises = np.arange(0.0, 0.05, 0.01)
+testNoises = np.arange(0.0, 0.04, 0.01)
 
 
 @pytest.mark.dependency(depends=["test_simple_calibration_status"])
