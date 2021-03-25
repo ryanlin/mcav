@@ -111,7 +111,7 @@ def add_noise_covariance(cov, noise):
     ])
 
 
-testNoises = np.arange(0.0, 0.04, 0.01)
+testNoises = np.arange(0.0, 0.05, 0.01)
 
 
 @pytest.mark.dependency(depends=["test_simple_calibration_status"])
@@ -127,10 +127,10 @@ def test_forward_calibration(T1, T2, cov1, cov2, noise, truth_calibration):
 
     rotation_error = np.linalg.norm(
         R_star - truth_calibration[0:3, 0:3], "fro")
-    assert rotation_error < 0.3
+    assert rotation_error < 0.02
 
-    translation_error = np.linalg.norm(t_star - truth_calibration[0:3, 3])
-    assert translation_error < 2.0
+    translation_error = np.linalg.norm(t_star - truth_calibration[0:3, 3:])
+    assert translation_error < 0.03
 
 
 @pytest.mark.dependency(depends=["test_simple_calibration_status"])
@@ -148,8 +148,8 @@ def test_backward_calibration(T1, T2, cov1, cov2, noise, truth_calibration):
 
     rotation_error = np.linalg.norm(
         R_star - truth_calibration_inverse[0:3, 0:3], "fro")
-    assert rotation_error < 0.3
+    assert rotation_error < 0.02
 
     translation_error = np.linalg.norm(
-        t_star - truth_calibration_inverse[0:3, 3])
-    assert translation_error < 2.0
+        t_star - truth_calibration_inverse[0:3, 3:])
+    assert translation_error < 0.03
