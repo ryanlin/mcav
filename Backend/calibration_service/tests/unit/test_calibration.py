@@ -127,10 +127,10 @@ def test_forward_calibration(T1, T2, cov1, cov2, noise, truth_calibration):
 
     rotation_error = np.linalg.norm(
         R_star - truth_calibration[0:3, 0:3], "fro")
-    assert rotation_error < 0.02
+    assert rotation_error < 0.04
 
     translation_error = np.linalg.norm(t_star - truth_calibration[0:3, 3:])
-    assert translation_error < 0.03
+    assert translation_error < 0.04
 
 
 @pytest.mark.dependency(depends=["test_simple_calibration_status"])
@@ -148,8 +148,8 @@ def test_backward_calibration(T1, T2, cov1, cov2, noise, truth_calibration):
 
     rotation_error = np.linalg.norm(
         R_star - truth_calibration_inverse[0:3, 0:3], "fro")
-    assert rotation_error < 0.02
+    assert rotation_error < 0.04
 
     translation_error = np.linalg.norm(
         t_star - truth_calibration_inverse[0:3, 3:])
-    assert translation_error < 0.03
+    assert translation_error < 0.04

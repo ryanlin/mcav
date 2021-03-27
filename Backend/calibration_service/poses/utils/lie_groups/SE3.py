@@ -24,14 +24,19 @@ def log(T: np.ndarray):
         A = 1.0 - (theta**2.0) / 6.0 + (theta**4.0) / 120.0
         B = 0.5 - (theta**2.0) / 24.0 + (theta**4.0) / 720.0
     else:
-        D = theta / (2 * np.sin(theta))
+        D = theta / (2.0 * np.sin(theta))
         A = np.sin(theta) / theta
-        B = (1 - np.cos(theta)) / theta**2.0
+        B = (1.0 - np.cos(theta)) / theta**2.0
 
     omega_x = D * (R - R.T)
 
-    V_inv = np.eye(3) - 0.5 * omega_x + 1.0 / theta**2 * \
-        (1.0 - A / (2.0 * B)) * omega_x @ omega_x
+    if theta < 0.001:
+        C = 1.0 / 6.0 - theta**2.0 / 120.0 + (theta**4.0) / 5040.0
+        V_inv = np.linalg.inv(np.eye(3) + B * omega_x +
+                              C * (omega_x @ omega_x))
+    else:
+        V_inv = np.eye(3) - (0.5 * omega_x) + ((1.0 / theta**2.0)
+                                               * (1.0 - A / (2.0 * B))) * (omega_x @ omega_x)
     u = V_inv @ t
 
     omega = np.array([omega_x[2, 1], -omega_x[2, 0], omega_x[1, 0]])

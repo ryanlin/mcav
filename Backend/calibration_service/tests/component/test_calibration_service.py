@@ -1,133 +1,140 @@
 import pytest
 import numpy as np
-from poses import Poses
-from calibration import calibrate
+from graph import Graph
+from calibration_service import *
+
+
+@pytest.fixture()
+def simple_graph_data():
+    return '''
+    {
+        "numberOfNodes": 2,
+        "numberOfEdges": 1,
+        "nodes": [
+            {
+                "id": 0,
+                "type": "pose",
+                "topic": "/gps_pose",
+                "rosbagPath": "input_data/lidar_odom.bag",
+                "axesAlignment": "East-North-Up",
+                "rotateOrientation": [0.0, 0.0, 0.0, 1.0],
+                "possibleTopics": ["/gps_pose", "/odom"]
+            },
+            {
+                "id": 1,
+                "type": "pose",
+                "topic": "/odom",
+                "rosbagPath": "input_data/lidar_odom.bag",
+                "axesAlignment": "Up-East-North",
+                "rotateOrientation": [0.0, 0.0, 0.6427876, 0.7660445],
+                "possibleTopics": ["/gps_pose", "/odom"]
+            }
+        ],
+        "edges": [
+            {
+                "id": 0,
+                "sourceNodeID": 1,
+                "targetNodeID": 0
+            }
+        ]
+    }
+    '''
 
 
 @pytest.fixture
-def gps_poses():
-    gps_poses = Poses.from_pose_bag(
-        "/gps_pose", "input_data/lidar_odom.bag")
-    return gps_poses
+def simple_graph(simple_graph_data):
+    return Graph(simple_graph_data)
 
 
 @pytest.fixture
-def lidar_poses():
-    lidar_poses = Poses.from_pose_bag(
-        "/odom", "input_data/lidar_odom.bag")
-
-    rotation_trajectory = np.array(
-        [[0.0, 0.0, 1.0, 0.0],
-         [1.0, 0.0, 0.0, 0.0],
-         [0.0, 1.0, 0.0, 0.0],
-         [0.0, 0.0, 0.0, 1.0]])
-    lidar_poses.transform_pose_(rotation_trajectory)
-
-    rotation_orientation = np.array(
-        [[0.1736482, -0.9848077, 0.0000000],
-         [0.9848077,  0.1736482, 0.0000000],
-         [0.0000000,  0.0000000, 1.0000000]])
-    lidar_poses.rotate_orientation_(rotation_orientation)
-
-    return lidar_poses
+def ids_poses(simple_graph):
+    return get_ids_poses(simple_graph.nodes)
 
 
 @pytest.mark.dependency()
-def test_gps_poses_from_bag_creation(gps_poses):
-    """Test the creation of the GPS pose by parsing a bag file"""
-    assert len(gps_poses.timestamps) == \
-        len(gps_poses.poses) == \
-        len(gps_poses.covariances) != 0
+def test_get_ids_poses_length(ids_poses, simple_graph):
+    assert len(ids_poses) == len(simple_graph.nodes) >= 2
 
 
-@pytest.mark.dependency()
-def test_lidar_poses_from_bag_creation(lidar_poses):
-    """Test the creation of the LiDAR pose by parsing a bag file"""
-    assert len(lidar_poses.timestamps) == \
-        len(lidar_poses.poses) == \
-        len(lidar_poses.covariances) != 0
+@pytest.mark.dependency(depends=["test_get_ids_poses_length"])
+def test_get_ids_poses_data_from_bag(ids_poses):
+    for poses in ids_poses.values():
+        assert len(poses.timestamps) == \
+            len(poses.poses) == \
+            len(poses.covariances) != 0
 
 
 @pytest.fixture
-def lidar_poses_sync(lidar_poses, gps_poses):
-    lidar_poses.sync_(gps_poses.timestamps)
-    return lidar_poses
+def synced_source_target_poses(ids_poses):
+    return sync_poses(ids_poses[1], ids_poses[0])
+
+
+@pytest.mark.dependency(depends=["test_get_ids_poses_data_from_bag"])
+def test_sync_poses(synced_source_target_poses, ids_poses):
+    lidar_poses, gps_poses = synced_source_target_poses
+    assert len(lidar_poses) > len(ids_poses[1])
+    assert len(gps_poses) == len(lidar_poses) != 0
+    assert np.allclose(gps_poses.timestamps, lidar_poses.timestamps)
 
 
 @pytest.fixture
-def gps_poses_sync(gps_poses, lidar_poses_sync):
-    gps_poses.sync_(lidar_poses_sync.timestamps)
-    return gps_poses
+def calibration_result(synced_source_target_poses):
+    source_poses_synced, target_poses_synced = synced_source_target_poses
+    return calibrate_synced_poses(source_poses_synced, target_poses_synced)
 
 
-@pytest.mark.dependency(depends=["test_gps_poses_from_bag_creation", "test_lidar_poses_from_bag_creation"])
-def test_interpolation_gps_lidar_poses_timestamp_sync(gps_poses_sync, lidar_poses_sync):
-    """Test the interpolated timestamps between GPS and LiDAR poses"""
-    assert len(lidar_poses_sync.timestamps) == len(gps_poses_sync.timestamps)
-    assert np.allclose(lidar_poses_sync.timestamps, gps_poses_sync.timestamps)
+@pytest.mark.dependency(depends=["test_sync_poses"])
+def test_calibrate_synced_poses_output_structure(calibration_result):
+    assert isinstance(calibration_result[0], np.ndarray)
+    assert isinstance(calibration_result[1], np.ndarray)
+    assert isinstance(calibration_result[2], bool)
 
 
-@pytest.fixture
-def gps_motion_covariance(gps_poses_sync):
-    return gps_poses_sync.egomotion()
-
-
-@pytest.fixture
-def lidar_motion_covariance(lidar_poses_sync):
-    return lidar_poses_sync.egomotion()
-
-
-@pytest.mark.dependency(depends=["test_interpolation_gps_lidar_poses_timestamp_sync"])
-def test_gps_egomotion_size(gps_motion_covariance):
-    """Test that relative motion and covariances of GPS are one data point less than poses"""
-    T, cov = gps_motion_covariance
-    assert len(T) == len(cov) != 0
-
-
-@pytest.mark.dependency(depends=["test_interpolation_gps_lidar_poses_timestamp_sync"])
-def test_lidar_egomotion_size(lidar_motion_covariance):
-    """Test that relative motion and covariances of LiDAR are one data point less than poses"""
-    T, cov = lidar_motion_covariance
-    assert len(T) == len(cov) != 0
-
-
-@pytest.mark.dependency(depends=["test_gps_egomotion_size", "test_lidar_egomotion_size"])
-def test_gps_lidar_egomotion_size(gps_motion_covariance, lidar_motion_covariance):
-    """Test that relative motion and covariances of GPS and LiDAR are of the same size"""
-    T_gps, _ = gps_motion_covariance
-    T_lidar, _ = lidar_motion_covariance
-    assert len(T_gps) == len(T_lidar)
-
-
-@pytest.fixture
-def calibration_result(gps_motion_covariance, lidar_motion_covariance):
-    T_gps, cov_gps = gps_motion_covariance
-    T_lidar, cov_lidar = lidar_motion_covariance
-    return calibrate(T_gps, T_lidar, cov_gps, cov_lidar)
-
-
-@pytest.mark.dependency(depends=["test_gps_lidar_egomotion_size"])
-def test_gps_lidar_calibration_status(calibration_result):
-    """Test that the calibration between LiDAR and GPS is successful"""
+@pytest.mark.dependency(depends=["test_calibrate_synced_poses_output_structure"])
+def test_calibrate_synced_poses_status(calibration_result):
     statusSuccess = calibration_result[2]
     assert statusSuccess
 
 
-@pytest.mark.dependency(depends=["test_gps_lidar_calibration_status"])
-def test_gps_lidar_calibration_rotation(calibration_result):
-    """Test that the calibration rotation error between LiDAR and GPS is small"""
+@pytest.mark.dependency(depends=["test_calibrate_synced_poses_status"])
+def test_calibration_rotation(calibration_result):
     calibration_rotation = calibration_result[0]
     truth_rotation = np.eye(3)
     rotation_error = np.linalg.norm(
         truth_rotation - calibration_rotation, "fro")
-    assert rotation_error < 0.5
+    assert rotation_error < 0.2
 
 
-@pytest.mark.dependency(depends=["test_gps_lidar_calibration_status"])
-def test_gps_lidar_calibration_translation(calibration_result):
-    """Test that the calibration translation error between LiDAR and GPS is small"""
+@pytest.mark.dependency(depends=["test_calibrate_synced_poses_status"])
+def test_calibration_translation(calibration_result):
     calibration_translation = calibration_result[1]
-    truth_translation = np.array([[0.0, 2.0, 0.75]])
-    translation_error = np.linalg.norm(np.squeeze(
-        truth_translation - calibration_translation))
-    assert translation_error < 20.0
+    truth_translation = np.array([[0.0], [2.0], [0.75]])
+    translation_error = np.linalg.norm(
+        truth_translation - calibration_translation)
+    assert translation_error < 10.0
+
+
+@pytest.mark.dependency(depends=["test_calibrate_synced_poses_status"])
+def test_fitness_score(synced_source_target_poses, calibration_result):
+    source_poses_synced, target_poses_synced = synced_source_target_poses
+
+    R_star, t_star, _ = calibration_result
+    T_star = np.block([[R_star, t_star], [0, 0, 0, 1]])
+
+    score = fitness_score(source_poses_synced, target_poses_synced, T_star)
+
+    assert score < 80.0
+
+
+@pytest.mark.dependency(depends=["test_calibrate_synced_poses_status"])
+def test_run_calibration_service(simple_graph_data):
+    calibration_results = run_calibration_service(simple_graph_data)
+    assert len(calibration_results) > 0
+
+    encountered_edge_id = []
+    for result in calibration_results:
+        assert result["id"] not in encountered_edge_id
+
+        encountered_edge_id.append(result["id"])
+
+        assert result["calibrationSucceeded"]

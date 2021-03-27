@@ -92,7 +92,7 @@ class Poses:
                                                      [0.0, 0.0, 0.0, 1.0]])) for pose in left_hand_poses])
 
     def __len__(self):
-        return len(self.timestamp)
+        return len(self.timestamps)
 
     def trajectory(self) -> np.ndarray:
         """Get (N x 3) trajectory coordinates."""
