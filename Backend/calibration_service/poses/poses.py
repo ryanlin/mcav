@@ -1,6 +1,5 @@
 from .utils import parse_bag
-from .utils.lie_groups import SE3
-from .utils.lie_groups import SO3
+from .utils.lie_groups import SE3, se3, SO3, adjoint
 from .utils import interpolate_timestamps_poses_covariances
 from .utils import compute_motion
 from .utils import compute_motion_covariance
@@ -88,7 +87,8 @@ class Poses:
         """
         assert transform.shape == (3, 3)
         left_hand_poses = np.array([SE3.inverse(pose) for pose in self.poses])
-        self.poses = np.array([SE3.inverse(np.block([[transform @ pose[0:3, 0:3], np.atleast_2d(pose[0:3, 3]).T],
+
+        self.poses = np.array([SE3.inverse(np.block([[pose[0:3, 0:3] @ transform, np.atleast_2d(pose[0:3, 3]).T],
                                                      [0.0, 0.0, 0.0, 1.0]])) for pose in left_hand_poses])
 
     def __len__(self):
@@ -101,7 +101,7 @@ class Poses:
 
     def orientation(self) -> np.ndarray:
         """Get (N x 3) unit vector of body frame's y-axis in world frame."""
-        return np.array([SO3.inverse(orientation)[0:3, 1] for orientation in self.poses[:, 0:3, 0:3]])
+        return np.array([SO3.inverse(orientation)[0:3, 2] for orientation in self.poses[:, 0:3, 0:3]])
 
     def sync_(self, timestamp_target: np.ndarray) -> np.ndarray:
         """Sync poses given target timestamps.

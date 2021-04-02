@@ -1,6 +1,5 @@
 from .quaternion_to_matrix import quaternion_to_matrix
-from .lie_groups import SE3
-from .lie_groups import SO3
+from .lie_groups import SE3, SO3
 import pandas as pd
 import numpy as np
 from bagpy import bagreader

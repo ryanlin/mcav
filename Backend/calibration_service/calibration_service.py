@@ -75,8 +75,13 @@ def calibrate_synced_poses(source_poses_synced: Poses, target_poses_synced: Pose
 
 def fitness_score(source_poses_synced: Poses, target_poses_synced: Poses, transform: np.ndarray):
     target_poses_from_transform = np.array([
-        transform @ src_pose @ SE3.inverse(transform)
-        for src_pose in source_poses_synced.poses
+        src_pose @ transform for src_pose in source_poses_synced.poses
+    ])
+
+    # Make pose start at origin
+    T1_inv = SE3.inverse(target_poses_from_transform[0])
+    target_poses_from_transform = np.array([
+        target_pose @ T1_inv for target_pose in target_poses_from_transform
     ])
 
     # Average error between truth and transformed target poses
