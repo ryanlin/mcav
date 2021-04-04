@@ -31,8 +31,8 @@ def parse_bag(topic: str, bag_file_path: str) -> Tuple[np.ndarray, np.ndarray, n
 
     # Organize transforms
     transforms = np.array(
-        [SE3.inverse(np.block([[R[i], np.array([[x[i]], [y[i]], [z[i]]])],
-                               [0.0, 0.0, 0.0, 1.0]]))
+        [np.block([[R[i], np.array([[x[i]], [y[i]], [z[i]]])],
+                   [0.0, 0.0, 0.0, 1.0]])
          for i in range(len(time_stamp))])
 
     return (time_stamp, transforms, covariance)

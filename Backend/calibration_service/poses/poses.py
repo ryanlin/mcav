@@ -56,20 +56,6 @@ class Poses:
         else:
             covariances = None
 
-        return cls.from_pose(poses, timestamps, covariances)
-
-    @classmethod
-    def from_pose(cls, poses: np.ndarray, timestamps: np.ndarray, covariances: Optional[np.ndarray] = None):
-        """Construct pose object.
-
-        poses: (Nx4x4) Pose matrices.
-        timestamps: (N) timestamps.
-        covariances: (Nx6x6) or (N) or None covariances.
-        """
-        # Compute relative poses
-        T1_inv = SE3.inverse(poses[0])
-        poses = np.array([pose @ T1_inv for pose in poses])
-
         return cls(timestamps, poses, covariances)
 
     def transform_pose_(self, transform: np.ndarray):
@@ -78,7 +64,7 @@ class Poses:
         transform: (4x4) transformation matrix
         """
         assert transform.shape == (4, 4)
-        self.poses = np.array([pose @ transform for pose in self.poses])
+        self.poses = np.array([transform @ pose for pose in self.poses])
 
     def rotate_orientation_(self, transform: np.ndarray):
         """Rotate orientation at each point along the trajectory in-place
@@ -86,22 +72,28 @@ class Poses:
         transform: (3x3) rotation matrix
         """
         assert transform.shape == (3, 3)
-        left_hand_poses = np.array([SE3.inverse(pose) for pose in self.poses])
-
-        self.poses = np.array([SE3.inverse(np.block([[pose[0:3, 0:3] @ transform, np.atleast_2d(pose[0:3, 3]).T],
-                                                     [0.0, 0.0, 0.0, 1.0]])) for pose in left_hand_poses])
+        self.poses = np.array([np.block([[pose[0:3, 0:3] @ transform, np.atleast_2d(pose[0:3, 3]).T],
+                                         [0.0, 0.0, 0.0, 1.0]]) for pose in self.poses])
 
     def __len__(self):
         return len(self.timestamps)
 
     def trajectory(self) -> np.ndarray:
         """Get (N x 3) trajectory coordinates."""
-        poses_world = np.array([SE3.inverse(pose) for pose in self.poses])
-        return poses_world[:, 0:3, 3]
+        return self.poses[:, 0:3, 3]
 
     def orientation(self) -> np.ndarray:
         """Get (N x 3) unit vector of body frame's y-axis in world frame."""
-        return np.array([SO3.inverse(orientation)[0:3, 2] for orientation in self.poses[:, 0:3, 0:3]])
+        return self.poses[:, 0:3, 1]
+
+    def relative_trajectory_orientation(self) -> Tuple[np.ndarray, np.ndarray]:
+        """Get relative trajectory coordinates and (N x 3) body frame's y-axis unit vector in world frame."""
+        # Compute relative poses
+        T1_inv = SE3.inverse(self.poses[0])
+        relative_poses = np.array([T1_inv @ pose for pose in self.poses])
+
+        # return trajectory, orientation
+        return relative_poses[:, 0:3, 3], relative_poses[:, 0:3, 1]
 
     def sync_(self, timestamp_target: np.ndarray) -> np.ndarray:
         """Sync poses given target timestamps.
@@ -158,3 +150,7 @@ class Poses:
         motion_cov = np.stack(motion_cov_list)
 
         return motion, motion_cov
+
+    def __relative_poses(self) -> np.ndarray:
+        T1_inv = SE3.inverse(self.poses[0])
+        return np.array([T1_inv @ pose for pose in self.poses])

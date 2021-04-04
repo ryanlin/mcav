@@ -2,6 +2,7 @@ from sys import argv
 import numpy as np
 import copy
 import json
+from typing import Tuple
 from graph import Graph
 from poses import Poses
 from poses import quaternion_to_matrix
@@ -19,27 +20,12 @@ def get_ids_poses(node_dict: dict):
     for id, node_info in node_dict.items():
         node_poses = Poses.from_pose_bag(
             node_info.topic, node_info.rosbag_path)
-
-        if node_info.axes_alignment == "Up-East-North":
-            # Align to East-North-Up
-            rotation_trajectory = np.array(
-                [[0.0, 0.0, 1.0, 0.0],
-                 [1.0, 0.0, 0.0, 0.0],
-                 [0.0, 1.0, 0.0, 0.0],
-                 [0.0, 0.0, 0.0, 1.0]])
-            node_poses.transform_pose_(rotation_trajectory)
-
-        orientation_rotation = quaternion_to_matrix(
-            np.array(node_info.rotate_orientation))
-        if not np.allclose(orientation_rotation, np.eye(3)):
-            node_poses.rotate_orientation_(orientation_rotation)
-
         ids_poses[id] = node_poses
 
     return ids_poses
 
 
-def sync_poses(poses1: Poses, poses2: Poses):
+def sync_poses(poses1: Poses, poses2: Poses) -> Tuple[Poses, Poses]:
     """Sync poses with least data to poses with most data"""
     poses1_copy = copy.deepcopy(poses1)
     poses2_copy = copy.deepcopy(poses2)
@@ -73,25 +59,29 @@ def calibrate_synced_poses(source_poses_synced: Poses, target_poses_synced: Pose
     return R_star, t_star, statusSuccess
 
 
-def fitness_score(source_poses_synced: Poses, target_poses_synced: Poses, transform: np.ndarray):
-    target_poses_from_transform = np.array([
-        src_pose @ transform for src_pose in source_poses_synced.poses
+def fitness_score(source_egomotion_synced: np.ndarray, target_egomotion_synced: np.ndarray, transform: np.ndarray):
+    """Compute rotation fitness and translation fitness."""
+    assert source_egomotion_synced.shape == target_egomotion_synced.shape
+    assert source_egomotion_synced[0].shape == (4, 4)
+    assert transform.shape == (4, 4)
+
+    source_egomotion_from_source = np.array([
+        transform @ target_egomotion @ SE3.inverse(transform) for target_egomotion in target_egomotion_synced
     ])
 
-    # Make pose start at origin
-    T1_inv = SE3.inverse(target_poses_from_transform[0])
-    target_poses_from_transform = np.array([
-        target_pose @ T1_inv for target_pose in target_poses_from_transform
-    ])
+    # Average error between truth and transformed source egomotion
+    rotation_fitness = 0.0
+    translation_fitness = 0.0
+    for source_egomotion_truth, source_egomotion_transformed in zip(source_egomotion_synced, source_egomotion_from_source):
+        rotation_fitness += np.linalg.norm(
+            source_egomotion_truth[0:3, 0:3] - source_egomotion_transformed[0:3, 0:3], "fro")
+        translation_fitness += np.linalg.norm(
+            source_egomotion_truth[0:3, 3] - source_egomotion_transformed[0:3, 3])
 
-    # Average error between truth and transformed target poses
-    fitness = 0.0
-    for target_pose_truth, target_pose_transformed in zip(target_poses_synced.poses, target_poses_from_transform):
-        fitness += np.linalg.norm(target_pose_truth - target_pose_transformed,
-                                  "fro")
-    fitness /= float(len(source_poses_synced))
+    rotation_fitness /= float(len(source_egomotion_synced))
+    translation_fitness /= float(len(source_egomotion_synced))
 
-    return fitness
+    return rotation_fitness, translation_fitness
 
 
 def run_calibration_service(json_message: str):
@@ -116,14 +106,15 @@ def run_calibration_service(json_message: str):
             source_poses_synced, target_poses_synced)
 
         T_star = np.block([[R_star, t_star], [0, 0, 0, 1]])
-
-        error_score = fitness_score(
-            source_poses_synced, target_poses_synced, T_star)
+        source_egomotion, _ = source_poses_synced.egomotion()
+        target_egomotion, _ = target_poses_synced.egomotion()
+        rotation_error, translation_error = fitness_score(
+            source_egomotion, target_egomotion, T_star)
 
         edge_calibration_result = {"id": edge_id,
                                    "calibrationSucceeded": statusSuccess,
                                    "matrix": T_star.flatten().tolist(),
-                                   "errScore": error_score}
+                                   "errScore": rotation_error + translation_error}
 
         edge_calibration_results.append(edge_calibration_result)
 

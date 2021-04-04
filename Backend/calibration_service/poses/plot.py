@@ -56,6 +56,8 @@ def plot(names_trajectories: Dict[str, np.ndarray],
                          color=np.clip(np.random.rand(3,), 0.3, 0.7),
                          s=2.0)
 
+    ax.set_xlim3d(-50, 50)
+    ax.set_ylim3d(-50, 50)
     ax.set_zlim3d(-50, 50)
 
     ax.set_xlabel('X axis')

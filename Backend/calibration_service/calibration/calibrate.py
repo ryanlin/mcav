@@ -76,7 +76,7 @@ def calibrate(Ta: np.ndarray,
     problem = cp.Problem(objective, constraint)
 
     problem.solve(solver=cp.CVXOPT, abstol=1e-7, max_iters=10000,
-                  refinement=70, kktsolver='robust')
+                  refinement=100, kktsolver='robust')
 
     # Exit if solution was not found
     if problem.status in ["infeasible", "unbounded"]:
