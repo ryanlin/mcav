@@ -8,8 +8,6 @@ class NodeInformation:
     type: str
     topic: str
     rosbag_path: str
-    axes_alignment: str
-    rotate_orientation: tuple
 
 
 @dataclass
@@ -37,9 +35,7 @@ class Graph:
 
             self.nodes[message_node["id"]] = NodeInformation(message_node["type"],
                                                              message_node["topic"],
-                                                             message_node["rosbagPath"],
-                                                             message_node["axesAlignment"],
-                                                             message_node["rotateOrientation"])
+                                                             message_node["rosbagPath"])
 
             if self.nodes[message_node["id"]].type not in ["pose"]:
                 raise ValueError("Must provide valid sensor type")
@@ -49,14 +45,6 @@ class Graph:
 
             if not self.nodes[message_node["id"]].rosbag_path:
                 raise ValueError("Must provide valid sensor rosbag_path")
-
-            if self.nodes[message_node["id"]].axes_alignment not in ["East-North-Up", "Up-East-North"]:
-                raise ValueError("Must provide valid sensor axes_alignment")
-
-            if len(self.nodes[message_node["id"]].rotate_orientation) != 4 or \
-                    not np.isclose(np.linalg.norm(self.nodes[message_node["id"]].rotate_orientation), 1.0):
-                raise ValueError(
-                    "Must provide valid sensor rotate_orientation")
 
         encountered_nodes = set()
 

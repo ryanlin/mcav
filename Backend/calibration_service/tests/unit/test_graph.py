@@ -14,8 +14,6 @@ def test_simple_graph():
                 "type": "pose",
                 "topic": "/gps_pose",
                 "rosbagPath": "input_data/lidar_odom.bag",
-                "axesAlignment": "East-North-Up",
-                "rotateOrientation": [0.0, 0.0, 0.0, 1.0],
                 "possibleTopics": ["/gps_pose", "/odom"]
             },
             {
@@ -23,8 +21,6 @@ def test_simple_graph():
                 "type": "pose",
                 "topic": "/odom",
                 "rosbagPath": "input_data/lidar_odom.bag",
-                "axesAlignment": "Up-East-North",
-                "rotateOrientation": [0.0, 0.0, 0.7071068, 0.7071068],
                 "possibleTopics": ["/gps_pose", "/odom"]
             }
         ],
@@ -51,8 +47,6 @@ def test_not_enough_nodes_exception():
                 "type": "pose",
                 "topic": "/gps_pose",
                 "rosbagPath": "input_data/lidar_odom.bag",
-                "axesAlignment": "East-North-Up",
-                "rotateOrientation": [0.0, 0.0, 0.0, 1.0],
                 "possibleTopics": ["/gps_pose", "/odom"]
             }
         ],
@@ -80,8 +74,6 @@ def test_not_enough_edges_exception():
                 "type": "pose",
                 "topic": "/gps_pose",
                 "rosbagPath": "input_data/lidar_odom.bag",
-                "axesAlignment": "East-North-Up",
-                "rotateOrientation": [0.0, 0.0, 0.0, 1.0],
                 "possibleTopics": ["/gps_pose", "/odom"]
             },
             {
@@ -89,8 +81,6 @@ def test_not_enough_edges_exception():
                 "type": "pose",
                 "topic": "/odom",
                 "rosbagPath": "input_data/lidar_odom.bag",
-                "axesAlignment": "Up-East-North",
-                "rotateOrientation": [0.0, 0.0, 0.7071068, 0.7071068],
                 "possibleTopics": ["/gps_pose", "/odom"]
             }
         ],
@@ -112,8 +102,6 @@ def test_node_same_id_exception():
                 "type": "pose",
                 "topic": "/gps_pose",
                 "rosbagPath": "input_data/lidar_odom.bag",
-                "axesAlignment": "East-North-Up",
-                "rotateOrientation": [0.0, 0.0, 0.0, 1.0],
                 "possibleTopics": ["/gps_pose", "/odom"]
             },
             {
@@ -121,8 +109,6 @@ def test_node_same_id_exception():
                 "type": "pose",
                 "topic": "/odom",
                 "rosbagPath": "input_data/lidar_odom.bag",
-                "axesAlignment": "Up-East-North",
-                "rotateOrientation": [0.0, 0.0, 0.7071068, 0.7071068],
                 "possibleTopics": ["/gps_pose", "/odom"]
             }
         ],
@@ -150,8 +136,6 @@ def test_invalid_sensor_type_exception():
                 "type": "pose",
                 "topic": "/gps_pose",
                 "rosbagPath": "input_data/lidar_odom.bag",
-                "axesAlignment": "East-North-Up",
-                "rotateOrientation": [0.0, 0.0, 0.0, 1.0],
                 "possibleTopics": ["/gps_pose", "/odom"]
             },
             {
@@ -159,8 +143,6 @@ def test_invalid_sensor_type_exception():
                 "type": "lidar",
                 "topic": "/odom",
                 "rosbagPath": "input_data/lidar_odom.bag",
-                "axesAlignment": "Up-East-North",
-                "rotateOrientation": [0.0, 0.0, 0.7071068, 0.7071068],
                 "possibleTopics": ["/gps_pose", "/odom"]
             }
         ],
@@ -188,8 +170,6 @@ def test_invalid_sensor_topic_exception():
                 "type": "pose",
                 "topic": "gps_pose",
                 "rosbagPath": "input_data/lidar_odom.bag",
-                "axesAlignment": "East-North-Up",
-                "rotateOrientation": [0.0, 0.0, 0.0, 1.0],
                 "possibleTopics": ["/gps_pose", "/odom"]
             },
             {
@@ -197,8 +177,6 @@ def test_invalid_sensor_topic_exception():
                 "type": "pose",
                 "topic": "/odom",
                 "rosbagPath": "input_data/lidar_odom.bag",
-                "axesAlignment": "Up-East-North",
-                "rotateOrientation": [0.0, 0.0, 0.7071068, 0.7071068],
                 "possibleTopics": ["/gps_pose", "/odom"]
             }
         ],
@@ -226,8 +204,6 @@ def test_invalid_sensor_bag_path_exception():
                 "type": "pose",
                 "topic": "/gps_pose",
                 "rosbagPath": "",
-                "axesAlignment": "East-North-Up",
-                "rotateOrientation": [0.0, 0.0, 0.0, 1.0],
                 "possibleTopics": ["/gps_pose", "/odom"]
             },
             {
@@ -235,84 +211,6 @@ def test_invalid_sensor_bag_path_exception():
                 "type": "pose",
                 "topic": "/odom",
                 "rosbagPath": "input_data/lidar_odom.bag",
-                "axesAlignment": "Up-East-North",
-                "rotateOrientation": [0.0, 0.0, 0.7071068, 0.7071068],
-                "possibleTopics": ["/gps_pose", "/odom"]
-            }
-        ],
-        "edges": [
-            {
-                "id": 0,
-                "sourceNodeID": 0,
-                "targetNodeID": 1
-            }
-        ]
-    }
-    '''
-    with pytest.raises(ValueError):
-        Graph(erroneous_graph_data)
-
-
-def test_invalid_sensor_axes_alignment_exception():
-    erroneous_graph_data = '''
-    {
-        "numberOfNodes": 2,
-        "numberOfEdges": 1,
-        "nodes": [
-            {
-                "id": 0,
-                "type": "pose",
-                "topic": "/gps_pose",
-                "rosbagPath": "input_data/lidar_odom.bag",
-                "axesAlignment": "East-North-Up",
-                "rotateOrientation": [0.0, 0.0, 0.0, 1.0],
-                "possibleTopics": ["/gps_pose", "/odom"]
-            },
-            {
-                "id": 1,
-                "type": "pose",
-                "topic": "/odom",
-                "rosbagPath": "input_data/lidar_odom.bag",
-                "axesAlignment": "North-East-Down",
-                "rotateOrientation": [0.0, 0.0, 0.7071068, 0.7071068],
-                "possibleTopics": ["/gps_pose", "/odom"]
-            }
-        ],
-        "edges": [
-            {
-                "id": 0,
-                "sourceNodeID": 0,
-                "targetNodeID": 1
-            }
-        ]
-    }
-    '''
-    with pytest.raises(ValueError):
-        Graph(erroneous_graph_data)
-
-
-def test_invalid_sensor_rotate_orientation_exception():
-    erroneous_graph_data = '''
-    {
-        "numberOfNodes": 2,
-        "numberOfEdges": 1,
-        "nodes": [
-            {
-                "id": 0,
-                "type": "pose",
-                "topic": "/gps_pose",
-                "rosbagPath": "input_data/lidar_odom.bag",
-                "axesAlignment": "East-North-Up",
-                "rotateOrientation": [0.0, 0.0, 0.0, 1.0],
-                "possibleTopics": ["/gps_pose", "/odom"]
-            },
-            {
-                "id": 1,
-                "type": "pose",
-                "topic": "/odom",
-                "rosbagPath": "input_data/lidar_odom.bag",
-                "axesAlignment": “North-Up-East”,
-                "rotateOrientation": [0.0, 0.0, 0.7071068, 1.7071068],
                 "possibleTopics": ["/gps_pose", "/odom"]
             }
         ],
@@ -340,8 +238,6 @@ def test_edge_same_id_exception():
                 "type": "pose",
                 "topic": "/gps_pose",
                 "rosbagPath": "input_data/lidar_odom.bag",
-                "axesAlignment": "East-North-Up",
-                "rotateOrientation": [0.0, 0.0, 0.0, 1.0],
                 "possibleTopics": ["/gps_pose", "/odom"]
             },
             {
@@ -349,8 +245,6 @@ def test_edge_same_id_exception():
                 "type": "pose",
                 "topic": "/odom",
                 "rosbagPath": "input_data/lidar_odom.bag",
-                "axesAlignment": "Up-East-North",
-                "rotateOrientation": [0.0, 0.0, 0.7071068, 0.7071068],
                 "possibleTopics": ["/gps_pose", "/odom"]
             }
         ],
@@ -383,8 +277,6 @@ def test_source_node_not_exist_exception():
                 "type": "pose",
                 "topic": "/gps_pose",
                 "rosbagPath": "input_data/lidar_odom.bag",
-                "axesAlignment": "East-North-Up",
-                "rotateOrientation": [0.0, 0.0, 0.0, 1.0],
                 "possibleTopics": ["/gps_pose", "/odom"]
             },
             {
@@ -392,8 +284,6 @@ def test_source_node_not_exist_exception():
                 "type": "pose",
                 "topic": "/odom",
                 "rosbagPath": "input_data/lidar_odom.bag",
-                "axesAlignment": "Up-East-North",
-                "rotateOrientation": [0.0, 0.0, 0.7071068, 0.7071068],
                 "possibleTopics": ["/gps_pose", "/odom"]
             }
         ],
@@ -421,8 +311,6 @@ def test_target_node_not_exist_exception():
                 "type": "pose",
                 "topic": "/gps_pose",
                 "rosbagPath": "input_data/lidar_odom.bag",
-                "axesAlignment": "East-North-Up",
-                "rotateOrientation": [0.0, 0.0, 0.0, 1.0],
                 "possibleTopics": ["/gps_pose", "/odom"]
             },
             {
@@ -430,8 +318,6 @@ def test_target_node_not_exist_exception():
                 "type": "pose",
                 "topic": "/odom",
                 "rosbagPath": "input_data/lidar_odom.bag",
-                "axesAlignment": "Up-East-North",
-                "rotateOrientation": [0.0, 0.0, 0.7071068, 0.7071068],
                 "possibleTopics": ["/gps_pose", "/odom"]
             }
         ],
@@ -459,8 +345,6 @@ def test_edges_same_nodes_exception():
                 "type": "pose",
                 "topic": "/gps_pose",
                 "rosbagPath": "input_data/lidar_odom.bag",
-                "axesAlignment": "East-North-Up",
-                "rotateOrientation": [0.0, 0.0, 0.0, 1.0],
                 "possibleTopics": ["/gps_pose", "/odom"]
             },
             {
@@ -468,8 +352,6 @@ def test_edges_same_nodes_exception():
                 "type": "pose",
                 "topic": "/odom",
                 "rosbagPath": "input_data/lidar_odom.bag",
-                "axesAlignment": "Up-East-North",
-                "rotateOrientation": [0.0, 0.0, 0.7071068, 0.7071068],
                 "possibleTopics": ["/gps_pose", "/odom"]
             }
         ],
