@@ -3,18 +3,19 @@
 For detailed documentation, please visit the [wiki page](https://github.com/ryanlin/mcav/wiki).
 
 
-Required Packages
-- nodejs
-- npm
-- yarn
-`npm install --global yarn`
+## Required Packages
+- nodejs ~ (`sudo apt install npm`)
+- npm ~ (`sudo apt install npm`)
+- yarn ~ (`npm install --global yarn`)
 
-**Note:** make sure you are in the mcav/ directory
+**Note:** Make sure you are in the mcav/ directory for the follow steps
 
-Install Dev Dependencies:
+## Install Dev Dependencies:
+
 `yarn`
 
-Start App in Development Mode
+## Start App in Development Mode
+
 `yarn start`
 
 
