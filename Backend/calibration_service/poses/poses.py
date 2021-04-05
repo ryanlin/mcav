@@ -29,12 +29,12 @@ class Poses:
                 covariance = np.array(
                     [float(v) for v in string[1: -1].split(',')]).reshape(6, 6).T
 
-                # Put zero if covariance matrix has all zeros
+                # Put identity if covariance matrix has all zeros
                 for i in range(6):
                     if not np.isclose(covariance[i, i], 0.0, rtol=1e-05, atol=1e-08, equal_nan=False):
                         break
                 else:
-                    covariances.append(0.1)
+                    covariances.append(np.eye(6))
                     continue
 
                 # Overestimation of rotation covariance of GPS. The car GPS sensor does not provide this.

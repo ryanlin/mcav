@@ -73,13 +73,13 @@ def cov2(config):
 
 
 @pytest.fixture
-def simple_calibration_result(T1, T2, cov1, cov2):
+def simple_forward_calibration_result(T1, T2, cov1, cov2):
     return calibrate(T1, T2, cov1, cov2)
 
 
 @pytest.mark.dependency()
-def test_simple_calibration_result_format(simple_calibration_result):
-    R_star, t_star, statusSuccess = simple_calibration_result
+def test_simple_forward_calibration_result_format(simple_forward_calibration_result):
+    R_star, t_star, statusSuccess, duality_gap = simple_forward_calibration_result
     # Rotation
     assert isinstance(R_star, np.ndarray)
     assert R_star.shape == (3, 3)
@@ -88,12 +88,67 @@ def test_simple_calibration_result_format(simple_calibration_result):
     assert t_star.shape == (3, 1)
     # Calibration status
     assert isinstance(statusSuccess, bool)
+    # Duality gap
+    assert isinstance(duality_gap, float)
+    assert duality_gap >= 0.0
 
 
-@pytest.mark.dependency(depends=["test_simple_calibration_result_format"])
-def test_simple_calibration_status(simple_calibration_result):
-    statusSuccess = simple_calibration_result[2]
+@pytest.mark.dependency(depends=["test_simple_forward_calibration_result_format"])
+def test_simple_forward_calibration_status(simple_forward_calibration_result):
+    statusSuccess = simple_forward_calibration_result[2]
     assert statusSuccess
+
+
+@pytest.mark.dependency(depends=["test_simple_forward_calibration_status"])
+def test_simple_forward_calibration_duality_gap(simple_forward_calibration_result):
+    duality_gap = simple_forward_calibration_result[3]
+    assert duality_gap < 1e-4
+
+
+@pytest.fixture
+def simple_backward_calibration_result(T1, T2, cov1, cov2):
+    return calibrate(T2, T1, cov2, cov1)
+
+
+@pytest.mark.dependency()
+def test_simple_backward_calibration_result_format(simple_backward_calibration_result):
+    R_star, t_star, statusSuccess, duality_gap = simple_backward_calibration_result
+    # Rotation
+    assert isinstance(R_star, np.ndarray)
+    assert R_star.shape == (3, 3)
+    # Translation
+    assert isinstance(t_star, np.ndarray)
+    assert t_star.shape == (3, 1)
+    # Calibration status
+    assert isinstance(statusSuccess, bool)
+    # Duality gap
+    assert isinstance(duality_gap, float)
+    assert duality_gap >= 0.0
+
+
+@pytest.mark.dependency(depends=["test_simple_backward_calibration_result_format"])
+def test_simple_backward_calibration_status(simple_backward_calibration_result):
+    statusSuccess = simple_backward_calibration_result[2]
+    assert statusSuccess
+
+
+@pytest.mark.dependency(depends=["test_simple_backward_calibration_status"])
+def test_simple_backward_calibration_duality_gap(simple_backward_calibration_result):
+    duality_gap = simple_backward_calibration_result[3]
+    assert duality_gap < 1e-4
+
+
+@pytest.mark.dependency(depends=["test_simple_forward_calibration_duality_gap", "test_simple_backward_calibration_duality_gap"])
+def test_forward_backward_transforms_are_inverse(simple_forward_calibration_result, simple_backward_calibration_result):
+    R_star_forward, t_star_forward, _, _ = simple_forward_calibration_result
+    T_star_forward = np.block(
+        [[R_star_forward, t_star_forward], [0, 0, 0, 1]])
+
+    R_star_backward, t_star_backward, _, _ = simple_backward_calibration_result
+    T_star_backward = np.block(
+        [[R_star_backward, t_star_backward], [0, 0, 0, 1]])
+
+    assert np.allclose(T_star_forward @ T_star_backward, np.eye(4), atol=1e-4)
 
 
 def add_noise_transform(T, noise_rotation, noise_translation):
@@ -114,7 +169,7 @@ def add_noise_covariance(cov, noise):
 testNoises = np.arange(0.0, 0.05, 0.01)
 
 
-@pytest.mark.dependency(depends=["test_simple_calibration_status"])
+@pytest.mark.dependency(depends=["test_forward_backward_transforms_are_inverse"])
 @pytest.mark.parametrize("noise", testNoises)
 def test_forward_calibration(T1, T2, cov1, cov2, noise, truth_calibration):
     Ta = add_noise_transform(T1, noise, noise)
@@ -122,7 +177,8 @@ def test_forward_calibration(T1, T2, cov1, cov2, noise, truth_calibration):
     cov_a = add_noise_covariance(cov1, noise)
     cov_b = add_noise_covariance(cov2, noise)
 
-    R_star, t_star, statusSuccess = calibrate(Ta, Tb, cov_a, cov_b)
+    R_star, t_star, statusSuccess, duality_gap = calibrate(
+        Ta, Tb, cov_a, cov_b)
     assert statusSuccess
 
     rotation_error = np.linalg.norm(
@@ -132,8 +188,10 @@ def test_forward_calibration(T1, T2, cov1, cov2, noise, truth_calibration):
     translation_error = np.linalg.norm(t_star - truth_calibration[0:3, 3:])
     assert translation_error < 0.04
 
+    assert duality_gap < 1e-3
 
-@pytest.mark.dependency(depends=["test_simple_calibration_status"])
+
+@pytest.mark.dependency(depends=["test_forward_backward_transforms_are_inverse"])
 @pytest.mark.parametrize("noise", testNoises)
 def test_backward_calibration(T1, T2, cov1, cov2, noise, truth_calibration):
     Ta = add_noise_transform(T1, noise, noise)
@@ -141,7 +199,8 @@ def test_backward_calibration(T1, T2, cov1, cov2, noise, truth_calibration):
     cov_a = add_noise_covariance(cov1, noise)
     cov_b = add_noise_covariance(cov2, noise)
 
-    R_star, t_star, statusSuccess = calibrate(Tb, Ta, cov_b, cov_a)
+    R_star, t_star, statusSuccess, duality_gap = calibrate(
+        Tb, Ta, cov_b, cov_a)
     assert statusSuccess
 
     truth_calibration_inverse = SE3.inverse(truth_calibration)
@@ -153,3 +212,5 @@ def test_backward_calibration(T1, T2, cov1, cov2, noise, truth_calibration):
     translation_error = np.linalg.norm(
         t_star - truth_calibration_inverse[0:3, 3:])
     assert translation_error < 0.04
+
+    assert duality_gap < 1e-3
