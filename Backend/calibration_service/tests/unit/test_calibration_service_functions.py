@@ -84,12 +84,20 @@ def test_calibrate_synced_poses_output_structure(calibration_result):
     assert isinstance(calibration_result[0], np.ndarray)
     assert isinstance(calibration_result[1], np.ndarray)
     assert isinstance(calibration_result[2], bool)
+    assert isinstance(calibration_result[3], float)
 
 
 @pytest.mark.dependency(depends=["test_calibrate_synced_poses_output_structure"])
 def test_calibrate_synced_poses_status(calibration_result):
     statusSuccess = calibration_result[2]
     assert statusSuccess
+
+
+@pytest.mark.dependency(depends=["test_calibrate_synced_poses_status"])
+def test_calibrate_duality_gap(calibration_result):
+    duality_gap = calibration_result[3]
+    assert duality_gap < 1e-4
+    print("Duality gap: " + str(duality_gap))
 
 
 @pytest.mark.dependency(depends=["test_calibrate_synced_poses_status"])
@@ -114,31 +122,3 @@ def test_calibration_translation(calibration_result):
         truth_translation - calibration_translation)
     assert translation_error < 0.31
     print("Translation error: " + str(translation_error))
-
-
-@pytest.fixture
-def rotation_translation_fitness_score(synced_source_target_poses, calibration_result):
-    source_poses_synced, target_poses_synced = synced_source_target_poses
-    source_egomotion, _ = source_poses_synced.egomotion()
-    target_egomotion, _ = target_poses_synced.egomotion()
-
-    R_star, t_star, _ = calibration_result
-    T_star = np.block([[R_star, t_star], [0, 0, 0, 1]])
-
-    return fitness_score(source_egomotion, target_egomotion, T_star)
-
-
-@pytest.mark.dependency(depends=["test_calibrate_synced_poses_status"])
-def test_rotation_fitness_score(rotation_translation_fitness_score):
-    rotation_score, _ = rotation_translation_fitness_score
-
-    assert rotation_score < 0.0031
-    print("Rotation fitness score: " + str(rotation_score))
-
-
-@pytest.mark.dependency(depends=["test_calibrate_synced_poses_status"])
-def test_translation_fitness_score(rotation_translation_fitness_score):
-    _, translation_score = rotation_translation_fitness_score
-
-    assert translation_score < 0.042
-    print("translation_score fitness score: " + str(translation_score))

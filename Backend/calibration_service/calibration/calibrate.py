@@ -10,7 +10,7 @@ def calibrate(Ta: np.ndarray,
               cov_b: np.ndarray,
               rh_cons: bool = True,
               row_orthog_cons: bool = True,
-              col_orthog_cons: bool = True) -> Tuple[np.ndarray, np.ndarray, bool]:
+              col_orthog_cons: bool = True) -> Tuple[np.ndarray, np.ndarray, bool, float]:
     """Finds optimal calibration parameters from sensor b to sensor a given motion data.
 
     :param Ra: (n x 3 x 3) rotation from sensor a
@@ -22,7 +22,7 @@ def calibrate(Ta: np.ndarray,
     :param rh_cons: right-handedness constraint
     :param row_orthog_cons: row orthogonality constraint
     :param col_orthog_cons: column orthogonality constraint
-    :return: calibrated rotation (3 x 3), translation (3 x 1), and status (boolean)
+    :return: calibrated rotation (3 x 3), translation (3 x 1), status (boolean), duality gap (float)
     """
     assert len(Ta) == len(Tb) == len(cov_a) == len(cov_b) > 0
     assert Ta.shape == Tb.shape
@@ -63,7 +63,7 @@ def calibrate(Ta: np.ndarray,
     # Rank of Qtt must be 3 or greater
     if np.linalg.matrix_rank(Qtt) < 3:
         print('Q_{t,t} rank < 3 for data given! Exiting Solver.')
-        return np.zeros((3, 3)), np.zeros((3, 1)), False
+        return np.zeros((3, 3)), np.zeros((3, 1)), False, 0.0
 
     Q_tilde = Qrr - Qrt @ np.linalg.inv(Qtt) @ Qtr
     P, gamma = construct_P(rh_cons, row_orthog_cons, col_orthog_cons)
@@ -81,7 +81,7 @@ def calibrate(Ta: np.ndarray,
     # Exit if solution was not found
     if problem.status in ["infeasible", "unbounded"]:
         print('Infeasible or unbounded.')
-        return np.zeros((3, 3)), np.zeros((3, 1)), False
+        return np.zeros((3, 3)), np.zeros((3, 1)), False, 0.0
 
     # Calculate the dual value and the matrix Z
     dual_value = problem.value
@@ -111,7 +111,7 @@ def calibrate(Ta: np.ndarray,
         # If the first 9 elements of both eigenvectors are not all zeros, then return failure
         if np.sum(non_zero) > 1:
             print('[ERROR] The first 9 elements of both eigenvectors are not all zeros')
-            return np.zeros((3, 3)), np.zeros((3, 1)), False
+            return np.zeros((3, 3)), np.zeros((3, 1)), False, 0.0
         # Get the eigenvector that does not have all of its first 9 elements zeros
         r_tilde_prime = potential_vec[:, non_zero]
         # Compute h
@@ -123,24 +123,24 @@ def calibrate(Ta: np.ndarray,
     else:
         # Cannot have more than 2 nullspace eigenvectors
         print('[ERROR] Cannot have more than 2 nullspace eigenvectors')
-        return np.zeros((3, 3)), np.zeros((3, 1)), False
+        return np.zeros((3, 3)), np.zeros((3, 1)), False, 0.0
 
     # Compute calibrated rotation and translation
     R_star = np.reshape(r_tilde_star[:9, 0], (3, 3), order='F')
     if np.linalg.norm(R_star.T @ R_star - np.eye(3), 'fro') > 0.1:
-        return np.zeros((3, 3)), np.zeros((3, 1)), False
+        return np.zeros((3, 3)), np.zeros((3, 1)), False, 0.0
 
     t_star = -(np.linalg.inv(Qtt) @ Qtr @ r_tilde_star)
 
-    # Check that the duality gap should be zero
+    # Compute duality gap (close to zero means closer to global solution)
     x_star = np.vstack((t_star, r_tilde_star))
     primal_value = (x_star.T @ Q @ x_star).item()
-    duality_gap = abs(primal_value - dual_value) / primal_value
-    if duality_gap > 0.001:
-        print('[WARNING] Duality gap too large: ' + str(duality_gap))
-        # return np.zeros(3), np.zeros(3), False
+    if primal_value < 1e-7 and dual_value < 1e-7:
+        duality_gap = 0.0
+    else:
+        duality_gap = abs(primal_value - dual_value) / primal_value
 
-    return R_star, t_star, True
+    return R_star, t_star, True, duality_gap
 
 
 def __construct_Qr(Mr: np.ndarray, kappa: Optional[np.ndarray] = None) -> np.ndarray:
