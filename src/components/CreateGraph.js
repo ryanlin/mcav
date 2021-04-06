@@ -315,6 +315,16 @@ const CreateGraph = () => {
           })}
         </Layer>
       </Stage>
+      <button
+        onClick={console.log("button clicked")}
+        style={{
+          position: 'absolute',
+          top: 100,
+          left: 20
+        }}
+      >
+        button
+      </button>
       <select
         id={"topicSelect"}
         onChange = {(e) => {
