@@ -17,55 +17,55 @@ var numOfEdges;
 // the ipcRenderer without exposing the entire object
 contextBridge.exposeInMainWorld(
   "api", {
-    name: process.versions["node"],
-    addNode: (channel) => {
-			let validChannels = ["addNode"];
-			if( validChannels.includes(channel) ) {
-				addNode();
-			}
-		},
-    clearGraph: (channel) => {
-      let validChannels = ["clearGraph"];
-      if( validChannels.includes(channel) ) {
-        clearGraph();
-      }
-    },
-    clearEdges: (channel) => {
-      let validChannels = ["clearEdges"];
-      if( validChannels.includes(channel) ) {
-        clearEdges();
-      }
-    },
-		rosbag: (channel, input) => {
-			let validChannels = ["rosbag"];
-			if( validChannels.includes(channel)) {
-				rosbagRun(input);
-			}
-		},
-		json: (channel, rosPath, jsonPath, gpsTopic, lidarTopic) => {
-			let validChannels = ["json"];
-			if( validChannels.includes(channel)) {
-				createJsonFileFrontEnd(rosPath, jsonPath, gpsTopic, lidarTopic);
-			}
-		},
-		calPlusJson: (channel, topicList) => {
-			let validChannels = ["calPlusJson"];
-			if( validChannels.includes(channel)) {
-				calPlusJson(topicList);
-			}
-		},
-		saveGraph: (channel, jsonPath) => {
-			let validChannels = ["saveGraph"];
-			if( validChannels.includes(channel)) {
-				saveGraph(jsonPath);
-			}
-		},
-    test: (channel, nodes, edges) => {
-      let validChannels = ["test"];
-      if( validChannels.includes(channel) ) {
-        test(nodes, edges);
-      }
-    }
+	name: process.versions["node"],
+	test: (channel, nodes, edges) => {
+	  let validChannels = ["test"];
+	  if( validChannels.includes(channel) ) {
+	    test(nodes, edges);
+		  }
+	},
+	clearGraph: (channel) => {
+	  let validChannels = ["clearGraph"];
+	  if( validChannels.includes(channel) ) {
+	    clearGraph();
+	  }
+	},
+	clearEdges: (channel) => {
+	  let validChannels = ["clearEdges"];
+	  if( validChannels.includes(channel) ) {
+	    clearEdges();
+	  }
+	},
+	addNode: (channel) => {
+		let validChannels = ["addNode"];
+		if( validChannels.includes(channel) ) {
+			addNode();
+		}
+	},
+	rosbag: (channel, input) => {
+		let validChannels = ["rosbag"];
+		if( validChannels.includes(channel)) {
+			rosbagRun(input);
+		}
+	},
+	json: (channel, rosPath, jsonPath, gpsTopic, lidarTopic) => {
+		let validChannels = ["json"];
+		if( validChannels.includes(channel)) {
+			createJsonFileFrontEnd(rosPath, jsonPath, gpsTopic, lidarTopic);
+		}
+	},
+	calPlusJson: (channel, topicList) => {
+		let validChannels = ["calPlusJson"];
+		if( validChannels.includes(channel)) {
+			calPlusJson(topicList);
+		}
+	},
+	saveGraph: (channel, jsonPath) => {
+		let validChannels = ["saveGraph"];
+		if( validChannels.includes(channel)) {
+			saveGraph(jsonPath);
+		}
+	}
   }
 )
 
