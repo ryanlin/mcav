@@ -5,13 +5,13 @@ import {Rect, Stage, Layer, Text, Circle, Arrow, Group, Line, Label, Tag} from '
 const circ_radius = 40
 
 const CreateGraph = () => {
-  const [circles, setCircles] = useState([]);
+  var [circles, setCircles] = useState([]);
   const stageRef = useRef(null);
   const layerRef = useRef(null);
-  const [connectors, setConnectors] = React.useState([]);
-  const [fromShapeId, setFromShapeId] = React.useState(null);
-  const [displayID, setDisplayID] = React.useState("N/A");
-  
+  var [connectors, setConnectors] = React.useState([]);
+  var [fromShapeId, setFromShapeId] = React.useState(null);
+  var [displayID, setDisplayID] = React.useState("N/A");
+
   return (
     <Stage width={window.innerWidth} height={window.innerHeight} ref={stageRef}>
       <Layer ref={layerRef}>
@@ -35,9 +35,15 @@ const CreateGraph = () => {
           x={65}
           y={50}
           onClick={(e) => {
+            console.log(JSON.stringify(circles));
             var layer = layerRef.current;
-            layer.find('.deleteMe').destroy();
             layer.find('Arrow').destroy();
+            layer.find('.deleteMe').destroy();
+            setConnectors([]);
+            setCircles([]);
+            window.api.clearGraph("clearGraph");
+            fromShapeId = null;
+            displayID = "N/A";
             layer.draw();
           }}
           onMouseOver={(e) => {
@@ -84,6 +90,8 @@ const CreateGraph = () => {
           onClick={(e) => {
             var layer = layerRef.current;
             layer.find('Arrow').destroy();
+            window.api.clearEdges("clearEdges");
+            setConnectors([]);
             layer.draw();
           }}
           onMouseOver={(e) => {
@@ -134,19 +142,15 @@ const CreateGraph = () => {
           stroke="blue"
           draggable
           onDragEnd={(e) => {
-            setCircles((prevCircles) => [
-              ...prevCircles,
-              {
-                name: "deleteMe",
-                x: e.target.x(), 
-                y: e.target.y(),
-                id: new Date(),
-                sensorType: "gps"
-                /*onDblClick: (e) => {
-                  e.target.destroy(); 
-                }*/
-              }
-            ]);
+            const newCircle = {
+              name: "deleteMe",
+              x: e.target.x(),
+              y: e.target.y(),
+              id: circles.length,
+              sensorType: "gps"
+            };
+            setCircles(circles.concat([newCircle]));
+            console.log(circles.length);
             var stage = stageRef.current;
             var draggableCircle = stage.findOne(".draggableCircle");
             draggableCircle.position({ x: 140, y: 180 });
@@ -160,7 +164,7 @@ const CreateGraph = () => {
             stage.container().style.cursor = 'default';
           }}
         />
-        
+
         <Circle
           name="draggableCircle2"
           x={140}
@@ -170,19 +174,14 @@ const CreateGraph = () => {
           stroke="red"
           draggable
           onDragEnd={(e) => {
-            setCircles((prevCircles) => [
-              ...prevCircles,
-              {
+              const newCircle = {
                 name: "deleteMe",
-                x: e.target.x(), 
+                x: e.target.x(),
                 y: e.target.y(),
-                id: new Date(),
+                id: circles.length,
                 sensorType: "lidar"
-                /*onDblClick: (e) => {
-                  e.target.destroy(); 
-                }*/
-              }
-            ]);
+              };
+            setCircles(circles.concat([newCircle]));
             var stage = stageRef.current;
             var draggableCircle = stage.findOne(".draggableCircle2");
             draggableCircle.position({ x: 140, y: 285 });
@@ -236,7 +235,7 @@ const CreateGraph = () => {
           text={"LIDAR"}
           fill="red"
         />
-        
+
         {circles.map((eachCircle) => (
           <Circle
             name={eachCircle.name}
@@ -254,16 +253,16 @@ const CreateGraph = () => {
               var a = stage.findOne('Rect');
             }} */
             onClick={() => {
-              if (fromShapeId) {
-                if (fromShapeId == eachCircle.id) {
+              if(fromShapeId != null) {
+                if(fromShapeId == eachCircle.id) {
                   setFromShapeId(null);
                   setDisplayID("N/A");
                 }
-                else {
+                else if( !checkEdges(fromShapeId, eachCircle, connectors) ) {
                   const newConnector = {
-                    from: fromShapeId,
-                    to: eachCircle.id,
-                    id: connectors.length
+                    id: connectors.length,
+                    sourceNodeId: fromShapeId,
+                    targetNodeId: eachCircle.id
                   };
                   setConnectors(connectors.concat([newConnector]));
                   setFromShapeId(null);
@@ -272,6 +271,8 @@ const CreateGraph = () => {
                 setFromShapeId(eachCircle.id);
                 console.log(eachCircle.id);
                 setDisplayID(eachCircle.sensorType);
+                //console.log(JSON.stringify(circles));
+                window.api.test("test", circles, connectors);
               }
             }}
             onMouseOver={() => {
@@ -284,23 +285,35 @@ const CreateGraph = () => {
             }}
           />
         ))}
-        
+
         {connectors.map(con => {
-          const from = circles.find(s => s.id === con.from);
-          const to = circles.find(s => s.id === con.to);
+          const sourceNodeId = circles.find(s => s.id === con.sourceNodeId);
+          const targetNodeId = circles.find(s => s.id === con.targetNodeId);
 
           return (
             <Arrow
               key={con.id}
-              points={[from.x, from.y, to.x, to.y]}
+              points={[sourceNodeId.x, sourceNodeId.y, targetNodeId.x, targetNodeId.y]}
               stroke="black"
             />
-            
+
           );
         })}
       </Layer>
     </Stage>
   );
 };
+
+function checkEdges(fromShapeId, eachCircle, edges) {
+  for(var i = 0; i < edges.length; i++ ){
+    if( (edges[i].sourceNodeId == fromShapeId || edges[i].sourceNodeId == eachCircle.id) &&
+        (edges[i].targetNodeId == fromShapeId || edges[i].targetNodeId == eachCircle.id) ) {
+      console.log(true);
+      return true;
+    }
+  }
+  console.log(false);
+  return false;
+}
 
 export default CreateGraph;
