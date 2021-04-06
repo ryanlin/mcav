@@ -38,12 +38,12 @@ class Poses:
                     continue
 
                 # Overestimation of rotation covariance of GPS. The car GPS sensor does not provide this.
-                if covariance[3, 3] == 0:
-                    covariance[3, 3] = 1
-                if covariance[4, 4] == 0:
-                    covariance[4, 4] = 1
-                if covariance[5, 5] == 0:
-                    covariance[5, 5] = 1
+                if covariance[3, 3] == 0.0:
+                    covariance[3, 3] = 1.0
+                if covariance[4, 4] == 0.0:
+                    covariance[4, 4] = 1.0
+                if covariance[5, 5] == 0.0:
+                    covariance[5, 5] = 1.0
 
                 covariances.append(covariance)
             covariances = np.stack(covariances)
