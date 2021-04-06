@@ -1,26 +1,27 @@
+# Constraint construction adopted and configured from
+# https://github.com/utiasSTARS/certifiable-calibration/blob/master/python/extrinsic_calibration/solver/constraint_gen.py
+
 import numpy as np
 import cvxpy as cp
 
 
-def construct_P(right_handedness: bool = True,
-                row_orthorgonality: bool = True,
-                col_orthorgonality: bool = True):
+def construct_P():
     X_gamma = cp.Variable(1)
     P = __construct_gamma(X_gamma)
 
-    if row_orthorgonality:
-        X_R = cp.Variable((3, 3), symmetric=True)
-        P = P + __construct_R(X_R)
+    # Row orthogonality
+    X_R = cp.Variable((3, 3), symmetric=True)
+    P = P + __construct_R(X_R)
 
-    if col_orthorgonality:
-        X_C = cp.Variable((3, 3), symmetric=True)
-        P = P + __construct_C(X_C)
+    # Column orthogonality
+    X_C = cp.Variable((3, 3), symmetric=True)
+    P = P + __construct_C(X_C)
 
-    if right_handedness:
-        X_ijk = cp.Variable((3, 1))
-        X_jki = cp.Variable((3, 1))
-        X_kij = cp.Variable((3, 1))
-        P = P + __construct_H(X_ijk, X_jki, X_kij)
+    # Right handedness
+    X_ijk = cp.Variable((3, 1))
+    X_jki = cp.Variable((3, 1))
+    X_kij = cp.Variable((3, 1))
+    P = P + __construct_H(X_ijk, X_jki, X_kij)
 
     return P, X_gamma
 

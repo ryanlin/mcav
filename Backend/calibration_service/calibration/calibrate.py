@@ -1,3 +1,6 @@
+# Calibration code adopted and configured from
+# https://github.com/utiasSTARS/certifiable-calibration/blob/master/python/extrinsic_calibration/solver/ext_solver.py
+
 import numpy as np
 import cvxpy as cp
 from typing import Tuple, Optional
@@ -7,21 +10,13 @@ from .utils import construct_P
 def calibrate(Ta: np.ndarray,
               Tb: np.ndarray,
               cov_a: np.ndarray,
-              cov_b: np.ndarray,
-              rh_cons: bool = True,
-              row_orthog_cons: bool = True,
-              col_orthog_cons: bool = True) -> Tuple[np.ndarray, np.ndarray, bool, float]:
+              cov_b: np.ndarray) -> Tuple[np.ndarray, np.ndarray, bool, float]:
     """Finds optimal calibration parameters from sensor b to sensor a given motion data.
 
-    :param Ra: (n x 3 x 3) rotation from sensor a
-    :param ta: (n x 3 x 1) translation from sensor a
-    :param Rb: (n x 3 x 3) rotation from sensor b
-    :param tb: (n x 3 x 1) translation from sensor b
+    :param Ta: (n x 4 x 4) Egomotion transformation matrices of sensor a
+    :param Tb: (n x 4 x 4) Egomotion transformation matrices of sensor b
     :param cov_a: (n x 6 x 6) covariances from sensor a
     :param cov_b: (n x 6 x 6) covariances from sensor b
-    :param rh_cons: right-handedness constraint
-    :param row_orthog_cons: row orthogonality constraint
-    :param col_orthog_cons: column orthogonality constraint
     :return: calibrated rotation (3 x 3), translation (3 x 1), status (boolean), duality gap (float)
     """
     assert len(Ta) == len(Tb) == len(cov_a) == len(cov_b) > 0
@@ -66,7 +61,7 @@ def calibrate(Ta: np.ndarray,
         return np.zeros((3, 3)), np.zeros((3, 1)), False, 0.0
 
     Q_tilde = Qrr - Qrt @ np.linalg.inv(Qtt) @ Qtr
-    P, gamma = construct_P(rh_cons, row_orthog_cons, col_orthog_cons)
+    P, gamma = construct_P()
     Z = Q_tilde + P
 
     # Z has to be a positive semi-definite matrix
@@ -128,6 +123,7 @@ def calibrate(Ta: np.ndarray,
     # Compute calibrated rotation and translation
     R_star = np.reshape(r_tilde_star[:9, 0], (3, 3), order='F')
     if np.linalg.norm(R_star.T @ R_star - np.eye(3), 'fro') > 0.1:
+        print('[ERROR] Orthogonality not hold for rotation matrix')
         return np.zeros((3, 3)), np.zeros((3, 1)), False, 0.0
 
     t_star = -(np.linalg.inv(Qtt) @ Qtr @ r_tilde_star)
@@ -149,13 +145,13 @@ def __construct_Qr(Mr: np.ndarray, kappa: Optional[np.ndarray] = None) -> np.nda
     if kappa is None:
         kappa = np.ones(n)
 
-    upperLeftSum = np.zeros((9, 9))
+    upper_left_sum = np.zeros((9, 9))
     for i in range(n):
         Mr_i = Mr[i]
         kappa_i = kappa[i]
-        upperLeftSum = upperLeftSum + kappa_i * Mr_i.T @ Mr_i
+        upper_left_sum += kappa_i * Mr_i.T @ Mr_i
 
-    return np.block([[upperLeftSum, np.zeros((9, 1))], [np.zeros((1, 9)), 0]])
+    return np.block([[upper_left_sum, np.zeros((9, 1))], [np.zeros((1, 9)), 0]])
 
 
 def __construct_Qt(Mt: np.ndarray, tao: Optional[np.ndarray] = None) -> np.ndarray:
@@ -168,7 +164,7 @@ def __construct_Qt(Mt: np.ndarray, tao: Optional[np.ndarray] = None) -> np.ndarr
     for i in range(n):
         Mt_i = Mt[i]
         tao_i = tao[i]
-        Qt = Qt + tao_i * Mt_i.T @ Mt_i
+        Qt += tao_i * Mt_i.T @ Mt_i
 
     return Qt
 
@@ -201,8 +197,10 @@ def __construct_Mt(ta: np.ndarray, Rb: np.ndarray, tb: np.ndarray) -> np.ndarray
 
 
 def __kappa(cov: np.ndarray) -> np.ndarray:
-    return np.asarray([np.linalg.norm(cov[i, 3:, 3:], ord='fro') for i in range(cov.shape[0])])
+    return np.asarray([np.clip(3.0 / np.linalg.norm(cov[i, 3:, 3:], ord='fro'), 1e-3, 1e3)
+                       for i in range(cov.shape[0])])
 
 
 def __tao(cov: np.ndarray) -> np.ndarray:
-    return np.asarray([np.linalg.norm(cov[i, 0:3, 0:3], ord='fro') for i in range(cov.shape[0])])
+    return np.asarray([np.clip(3.0 / np.linalg.norm(cov[i, 0:3, 0:3], ord='fro'), 1e-3, 1e3)
+                       for i in range(cov.shape[0])])
