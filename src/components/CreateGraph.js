@@ -1,21 +1,59 @@
 import React, { useState, useRef, useForm } from 'react';
 import { render } from 'react-dom';
 import {Rect, Stage, Layer, Text, Circle, Arrow, Group, Line, Label, Tag} from 'react-konva';
+const {api} = window;
+import * as actionListeners from "../functions.js";
+import { DropDown, CalibrationPanels } from './panels';
 
-const circ_radius = 40
+const INITIAL_STATE = [];
+const INITIAL_CALIBRATIONS = {
+  "edges": []
+};
+
+const circ_radius = 40;
+
+var topicList = [];
 
 const CreateGraph = () => {
-  var [circles, setCircles] = useState([]);
+  const [bagTopics, setBagTopics] = useState(INITIAL_STATE);
+  const [fileState, setFileState] = useState("null");
+  const [topic, setTopic] = useState("null");
+
   const stageRef = useRef(null);
   const layerRef = useRef(null);
-  var [connectors, setConnectors] = React.useState([]);
+  var [circles, setCircles] = useState(INITIAL_STATE);
+  var [connectors, setConnectors] = React.useState(INITIAL_STATE);
   var [fromShapeId, setFromShapeId] = React.useState(null);
   var [displayID, setDisplayID] = React.useState("N/A");
-  const [topic, setTopic] = useState("null");
-  const [fileState, setFileState] = useState("null");
+
+  // Handlers
   const handleFileUpload = e => {
     setFileState(e.target.files[0]);
   };
+
+  const onClickCalibrate = () => {
+    var fullGraph = {
+      numberOfNodes: circles.length,
+      numberOfEdges: connectors.length,
+      nodes: circles,
+      edges: connectors
+    };
+    console.log(fullGraph);
+    // api.calibration("calibration", fullGraph);
+  }
+
+  const selectTopic = (e) => {
+    setTopic(e.target.value);
+  }
+
+  // API Receivers:
+  api.receive("bagfile", (res) => {
+    console.log("bagfile recieved");
+    topicList = JSON.parse(JSON.stringify(res));
+    console.log(topicList);
+
+    setBagTopics(topicList);
+  }, []);
 
   return (
     <div>
@@ -47,7 +85,7 @@ const CreateGraph = () => {
               layer.find('.deleteMe').destroy();
               setConnectors([]);
               setCircles([]);
-              window.api.clearGraph("clearGraph");
+              api.clearGraph("clearGraph");
               fromShapeId = null;
               displayID = "N/A";
               layer.draw();
@@ -96,7 +134,7 @@ const CreateGraph = () => {
             onClick={(e) => {
               var layer = layerRef.current;
               layer.find('Arrow').destroy();
-              window.api.clearEdges("clearEdges");
+              api.clearEdges("clearEdges");
               setConnectors([]);
               layer.draw();
             }}
@@ -154,7 +192,8 @@ const CreateGraph = () => {
                 y: e.target.y(),
                 id: circles.length,
                 sensorType: "gps",
-                sensorTopic: "null"
+                type: "pose",
+                topic: "null"
               };
               setCircles(circles.concat([newCircle]));
               console.log(circles.length);
@@ -187,7 +226,7 @@ const CreateGraph = () => {
                   y: e.target.y(),
                   id: circles.length,
                   sensorType: "lidar",
-                  sensorTopic: "null"
+                  topic: "null"
                 };
               setCircles(circles.concat([newCircle]));
               var stage = stageRef.current;
@@ -253,7 +292,7 @@ const CreateGraph = () => {
               radius={circ_radius}
               fill={fromShapeId === eachCircle.id ? "red" : "green"}
               sensorType={eachCircle.sensorType}
-              sensorTopic={eachCircle.sensorTopic}
+              topic={eachCircle.topic}
               stroke={eachCircle.sensorType === "gps" ? "blue" : "red"}
               // draggable={true}
               /* onDblClick={(e) => {
@@ -266,7 +305,7 @@ const CreateGraph = () => {
                   if(fromShapeId == eachCircle.id) {
                     setFromShapeId(null);
                     setDisplayID("N/A");
-                    eachCircle.sensorTopic = topic;
+                    eachCircle.topic = topic;
                     document.getElementById("topicSelect").selectedIndex = 0;
                   }
                   else if( !checkEdges(fromShapeId, eachCircle, connectors) ) {
@@ -279,18 +318,18 @@ const CreateGraph = () => {
                     setFromShapeId(null);
                   }
                 } else {
-                  setTopic(eachCircle.sensorTopic);
+                  setTopic(eachCircle.topic);
                   var i;
                   var a = document.getElementById("topicSelect");
                   for(i = 0; i < a.options.length; i++) {
-                    if(a.options[i].label == eachCircle.sensorTopic) {
+                    if(a.options[i].label == eachCircle.topic) {
                       a.selectedIndex = i;
                     }
                   }
                   setFromShapeId(eachCircle.id);
                   setDisplayID(eachCircle.sensorType);
                   //console.log(JSON.stringify(circles));
-                  window.api.test("test", circles, connectors);
+                  api.test("test", circles, connectors);
                 }
               }}
               onMouseOver={() => {
@@ -333,6 +372,7 @@ const CreateGraph = () => {
       <button
         onClick={() => {
           console.log(fileState.path);
+          api.rosbag("rosbag", fileState.path);
         }}
         style={{
           position: 'absolute',
@@ -343,26 +383,15 @@ const CreateGraph = () => {
         Import bag file
       </button>
 
-      <select
-        id={"topicSelect"}
-        onChange = {(e) => {
-          setTopic(e.target.value);
-        }}
-        style={{
-          position: 'absolute',
-          top: 480,
-          left: 30
-        }}
-      >
-        <option>Choose a Topic</option>
-        <option>Topic1</option>
-        <option>Topic2</option>
-      </select>
+      <DropDown
+        id="topicSelect"
+        options={bagTopics}
+        onChange={selectTopic}
+        instruction="Choose a Topic"
+      />
 
       <button
-        onClick={() => {
-          console.log("calibrating...");
-        }}
+        onClick={onClickCalibrate}
         style={{
           backgroundColor: "green",
           fontSize: "16px",
@@ -375,10 +404,29 @@ const CreateGraph = () => {
         }}
         >
           Calibrate!
-      </button>
+      </button>      
     </div>
   );
 };
+
+api.receive("clear", (res) => {
+  console.log('recieved');
+  console.log(res);
+}, []);
+
+// api.receive("bagfile", (res) => {
+//   console.log("bagfile recieved");
+//   topicList = JSON.parse(JSON.stringify(res));
+//   console.log(topicList);
+
+//   // TAIGA ADD TOPICS TO DROP DOWN MENU //
+
+// }, []);
+
+api.receive("calibration", (res) => {
+  console.log("calibration recieved");
+  console.log(res);
+}, []);
 
 function checkEdges(fromShapeId, eachCircle, edges) {
   for(var i = 0; i < edges.length; i++ ){
