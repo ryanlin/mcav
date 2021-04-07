@@ -226,6 +226,7 @@ const CreateGraph = () => {
                   y: e.target.y(),
                   id: circles.length,
                   sensorType: "lidar",
+                  type: "pose",
                   topic: "null"
                 };
               setCircles(circles.concat([newCircle]));
@@ -293,6 +294,7 @@ const CreateGraph = () => {
               fill={fromShapeId === eachCircle.id ? "red" : "green"}
               sensorType={eachCircle.sensorType}
               topic={eachCircle.topic}
+              type={eachCircle.type}
               stroke={eachCircle.sensorType === "gps" ? "blue" : "red"}
               // draggable={true}
               /* onDblClick={(e) => {
