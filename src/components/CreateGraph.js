@@ -3,23 +3,44 @@ import { render } from 'react-dom';
 import {Rect, Stage, Layer, Text, Circle, Arrow, Group, Line, Label, Tag} from 'react-konva';
 const {api} = window;
 import * as actionListeners from "../functions.js";
+import { DropDown } from './panels';
+
+const INITIAL_STATE = []
 
 const circ_radius = 40;
 
 var topicList = [];
 
 const CreateGraph = () => {
-  var [circles, setCircles] = useState([]);
+  const [bagTopics, setBagTopics] = useState(INITIAL_STATE);
+  const [fileState, setFileState] = useState("null");
+  const [topic, setTopic] = useState("null");
+
   const stageRef = useRef(null);
   const layerRef = useRef(null);
-  var [connectors, setConnectors] = React.useState([]);
+  var [circles, setCircles] = useState(INITIAL_STATE);
+  var [connectors, setConnectors] = React.useState(INITIAL_STATE);
   var [fromShapeId, setFromShapeId] = React.useState(null);
   var [displayID, setDisplayID] = React.useState("N/A");
-  const [topic, setTopic] = useState("null");
-  const [fileState, setFileState] = useState("null");
+
+  // Event Handlers
   const handleFileUpload = e => {
     setFileState(e.target.files[0]);
   };
+
+  const selectTopic = (e) => {
+    setTopic(e.target.value);
+  }
+
+  // API Receivers:
+  api.receive("bagfile", (res) => {
+    console.log("bagfile recieved");
+    topicList = JSON.parse(JSON.stringify(res));
+    console.log(topicList);
+
+    setBagTopics(topicList);
+
+  }, []);
 
   return (
     <div>
@@ -348,21 +369,11 @@ const CreateGraph = () => {
         Import bag file
       </button>
 
-      <select
-        id={"topicSelect"}
-        onChange = {(e) => {
-          setTopic(e.target.value);
-        }}
-        style={{
-          position: 'absolute',
-          top: 480,
-          left: 30
-        }}
-      >
-        <option>Choose a Topic</option>
-        <option>Topic1</option>
-        <option>Topic2</option>
-      </select>
+      <DropDown
+        id="topicSelect"
+        options={bagTopics}
+        onChange={selectTopic}
+      />
 
       <button
         onClick={() => {
@@ -391,14 +402,14 @@ api.receive("clear", (res) => {
   console.log(res);
 }, []);
 
-api.receive("bagfile", (res) => {
-  console.log("bagfile recieved");
-  topicList = JSON.parse(JSON.stringify(res));
-  console.log(topicList);
+// api.receive("bagfile", (res) => {
+//   console.log("bagfile recieved");
+//   topicList = JSON.parse(JSON.stringify(res));
+//   console.log(topicList);
 
-  // TAIGA ADD TOPICS TO DROP DOWN MENU //
+//   // TAIGA ADD TOPICS TO DROP DOWN MENU //
 
-}, []);
+// }, []);
 
 function checkEdges(fromShapeId, eachCircle, edges) {
   for(var i = 0; i < edges.length; i++ ){
