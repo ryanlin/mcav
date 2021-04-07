@@ -5,24 +5,22 @@ import { MainMenu, CreateGraph, } from "./components";
 
 import './index.css';
 
-class AppDos extends React.Component {
+class App extends React.Component {
   render() {
     return (
       <div className="app">
         <Router>
           <Switch>
-            <Route path="/" exact component = {() => <MainlMenu />} />
             <Route path="/create_graph" exact component = {() => <CreateGraph />} />
+            <Route path="" exact component = {() => <MainMenu />} />
           </Switch>
 
-          <Link to="/create_graph">{window.api.name}</Link>
+          <br/>
+          <Link to="create_graph">Create Graph</Link>
         </Router>
-
-        <br/>
-        <MainMenu />
       </div>
     );
   }
 }
 
-export default AppDos;
+export default App;
