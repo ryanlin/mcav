@@ -20,6 +20,16 @@ const CreateGraph = () => {
   const handleFileUpload = e => {
     setFileState(e.target.files[0]);
   };
+  const onClickCalibrate = () => {
+    var fullGraph = {
+      numberOfNodes: circles.length,
+      numberOfEdges: connectors.length,
+      nodes: circles,
+      edges: connectors
+    };
+    console.log(fullGraph);
+    api.calibration("calibration", fullGraph);
+  }
 
   return (
     <div>
@@ -365,10 +375,7 @@ const CreateGraph = () => {
       </select>
 
       <button
-        onClick={() => {
-          console.log("calibrating...");
-          actionListeners.handleClick(circles);
-        }}
+        onClick={onClickCalibrate}
         style={{
           backgroundColor: "green",
           fontSize: "16px",
@@ -398,6 +405,11 @@ api.receive("bagfile", (res) => {
 
   // TAIGA ADD TOPICS TO DROP DOWN MENU //
 
+}, []);
+
+api.receive("calibration", (res) => {
+  console.log("calibration recieved");
+  console.log(res);
 }, []);
 
 function checkEdges(fromShapeId, eachCircle, edges) {

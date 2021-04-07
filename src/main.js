@@ -59,5 +59,10 @@ ipcMain.on("bagfile", (event, data) => {
   window.webContents.send("bagfile", data);
 })
 
+ipcMain.on("calibration", (event, data) => {
+  console.log("Calibration obtained");
+  window.webContents.send("calibration", data);
+})
+
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
