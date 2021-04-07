@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useForm } from 'react';
 import { render } from 'react-dom';
 import {Rect, Stage, Layer, Text, Circle, Arrow, Group, Line, Label, Tag} from 'react-konva';
 
@@ -12,6 +12,10 @@ const CreateGraph = () => {
   var [fromShapeId, setFromShapeId] = React.useState(null);
   var [displayID, setDisplayID] = React.useState("N/A");
   const [topic, setTopic] = useState("null");
+  const [fileState, setFileState] = useState("null");
+  const handleFileUpload = e => {
+    setFileState(e.target.files[0]);
+  };
 
   return (
     <div>
@@ -315,20 +319,30 @@ const CreateGraph = () => {
           })}
         </Layer>
       </Stage>
+      <input
+        type={"file"}
+        style={{
+          position: 'absolute',
+          top: 433,
+          left: 30
+        }}
+        onChange={handleFileUpload}
+      >
+      </input>
+
       <button
         onClick={() => {
-          console.log("button clicked")
-          var output = window.api.test("test", circles, connectors);
-          console.log(window.api.test2);
+          console.log(fileState.path);
         }}
         style={{
           position: 'absolute',
-          top: 100,
-          left: 20
+          top: 456,
+          left: 30
         }}
       >
-        button
+        Import bag file
       </button>
+
       <select
         id={"topicSelect"}
         onChange = {(e) => {
@@ -336,7 +350,7 @@ const CreateGraph = () => {
         }}
         style={{
           position: 'absolute',
-          top: 440,
+          top: 480,
           left: 30
         }}
       >
@@ -344,6 +358,24 @@ const CreateGraph = () => {
         <option>Topic1</option>
         <option>Topic2</option>
       </select>
+
+      <button
+        onClick={() => {
+          console.log("calibrating...");
+        }}
+        style={{
+          backgroundColor: "green",
+          fontSize: "16px",
+          padding: "10px 24px",
+          borderRadius: "12px",
+          color: "white",
+          position: 'absolute',
+          top: 570,
+          left: 65
+        }}
+        >
+          Calibrate!
+      </button>
     </div>
   );
 };
