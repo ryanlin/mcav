@@ -2,6 +2,7 @@ import React from 'react';
 
 function DropDown(props) {
   const options = props.options;
+  const instruction = props.instruction;
 
   return(
     <select
@@ -13,7 +14,7 @@ function DropDown(props) {
         left: 30
       }}
     >
-      <option>Choose a Topic</option>
+      <option>{props.instruction}</option>
       {options.map( (option) => (
         <option>{option}</option>
       ))}
