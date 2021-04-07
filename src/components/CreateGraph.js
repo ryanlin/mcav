@@ -16,6 +16,16 @@ const CreateGraph = () => {
   const handleFileUpload = e => {
     setFileState(e.target.files[0]);
   };
+  const onClickCalibrate = () => {
+    var fullGraph = {
+      numberofNodes: circles.length,
+      numberofEdges: connectors.length,
+      nodes: circles,
+      edges: connectors
+    };
+    //console.log(fullGraph);
+    //window.api.calibrateListener("calibrateListener", fullGraph);
+  }
 
   return (
     <div>
@@ -360,9 +370,7 @@ const CreateGraph = () => {
       </select>
 
       <button
-        onClick={() => {
-          console.log("calibrating...");
-        }}
+        onClick={onClickCalibrate}
         style={{
           backgroundColor: "green",
           fontSize: "16px",
