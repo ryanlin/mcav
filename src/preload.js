@@ -264,8 +264,7 @@ function calibration(inputGraph) {
 	else
 	{
     frontendGraph = inputGraph;
-    console.log(frontendGraph);
-    ipcRenderer.send("calibration", frontendGraph);
+    console.log(inputGraph);
 		var jsonStr = JSON.stringify(inputGraph);
 
 		let options = {
@@ -273,7 +272,6 @@ function calibration(inputGraph) {
 			args: [jsonStr]
 		};
 
-/*
 		PythonShell.run('Backend/calibration_service/calibration_service.py', options, function (err, results) {
 			// const calBtn = document.getElementById("calBtn");
 			// calBtn.className = "btn btn-primary ld-over";
@@ -284,6 +282,11 @@ function calibration(inputGraph) {
 				throw err;
 			}
 			else {
+        var calResult = JSON.parse(results[2]);
+        console.log(calResult);
+        console.log(calResult[0]);
+        console.log(calResult[0].matrix);
+        ipcRenderer.send("calibration", results[2]);
 				// calResult.textContent = "Calibration SUCCESS: ";
 				// resultTable.innerHTML += '<tr><td>' + "Output: " + '</td></tr>';
 				//TO DO: Debug bagreader so that it doesnt print anything while reading bag files//
@@ -301,10 +304,11 @@ function calibration(inputGraph) {
 
 				backendGraph = JSON.parse(matr);
 
-				createFullGraph();
+				//createFullGraph();
+        //ipcRenderer.send("calibration", fullGraph);
 			}
 		});
-    */
+
 	}
 }
 

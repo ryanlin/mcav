@@ -29,6 +29,11 @@ const CreateGraph = () => {
   // Handlers
   const handleFileUpload = e => {
     setFileState(e.target.files[0]);
+    console.log(e.target.files[0].path);
+    circles.forEach( circle => {
+      circle.rosbagPath = e.target.files[0].path;
+    });
+    console.log(circles);
   };
 
   const onClickCalibrate = () => {
@@ -38,8 +43,12 @@ const CreateGraph = () => {
       nodes: circles,
       edges: connectors
     };
-    console.log(fullGraph);
-    // api.calibration("calibration", fullGraph);
+    api.receive("calibration", (res) => {
+      console.log("calibration recieved");
+      console.log(res);
+    }, []);
+    //console.log(fullGraph);
+    api.calibration("calibration", fullGraph);
   }
 
   const selectTopic = (e) => {
@@ -47,13 +56,20 @@ const CreateGraph = () => {
   }
 
   // API Receivers:
-  api.receive("bagfile", (res) => {
+  /*api.receive("bagfile", (res) => {
     console.log("bagfile recieved");
     topicList = JSON.parse(JSON.stringify(res));
     console.log(topicList);
 
     setBagTopics(topicList);
+  }, []);*/
+
+/*
+  api.receive("calibration", (res) => {
+    console.log("calibration recieved");
+    console.log(res);
   }, []);
+*/
 
   return (
     <div>
@@ -225,6 +241,7 @@ const CreateGraph = () => {
                   x: e.target.x(),
                   y: e.target.y(),
                   id: circles.length,
+                  type: "pose",
                   sensorType: "lidar",
                   topic: "null"
                 };
@@ -311,8 +328,8 @@ const CreateGraph = () => {
                   else if( !checkEdges(fromShapeId, eachCircle, connectors) ) {
                     const newConnector = {
                       id: connectors.length,
-                      sourceNodeId: fromShapeId,
-                      targetNodeId: eachCircle.id
+                      sourceNodeID: fromShapeId,
+                      targetNodeID: eachCircle.id
                     };
                     setConnectors(connectors.concat([newConnector]));
                     setFromShapeId(null);
@@ -344,13 +361,13 @@ const CreateGraph = () => {
           ))}
 
           {connectors.map(con => {
-            const sourceNodeId = circles.find(s => s.id === con.sourceNodeId);
-            const targetNodeId = circles.find(s => s.id === con.targetNodeId);
+            const sourceNodeID = circles.find(s => s.id === con.sourceNodeID);
+            const targetNodeID = circles.find(s => s.id === con.targetNodeID);
 
             return (
               <Arrow
                 key={con.id}
-                points={[sourceNodeId.x, sourceNodeId.y, targetNodeId.x, targetNodeId.y]}
+                points={[sourceNodeID.x, sourceNodeID.y, targetNodeID.x, targetNodeID.y]}
                 stroke="black"
               />
 
@@ -373,6 +390,14 @@ const CreateGraph = () => {
         onClick={() => {
           console.log(fileState.path);
           api.rosbag("rosbag", fileState.path);
+          api.receive("bagfile", (res) => {
+            console.log("bagfile recieved");
+            topicList = JSON.parse(JSON.stringify(res));
+            console.log(topicList);
+
+            setBagTopics(topicList);
+
+          }, []);
         }}
         style={{
           position: 'absolute',
@@ -404,7 +429,7 @@ const CreateGraph = () => {
         }}
         >
           Calibrate!
-      </button>      
+      </button>
     </div>
   );
 };
@@ -423,15 +448,17 @@ api.receive("clear", (res) => {
 
 // }, []);
 
+/*
 api.receive("calibration", (res) => {
   console.log("calibration recieved");
   console.log(res);
 }, []);
+*/
 
 function checkEdges(fromShapeId, eachCircle, edges) {
   for(var i = 0; i < edges.length; i++ ){
-    if( (edges[i].sourceNodeId == fromShapeId || edges[i].sourceNodeId == eachCircle.id) &&
-        (edges[i].targetNodeId == fromShapeId || edges[i].targetNodeId == eachCircle.id) ) {
+    if( (edges[i].sourceNodeID == fromShapeId || edges[i].sourceNodeID == eachCircle.id) &&
+        (edges[i].targetNodeID == fromShapeId || edges[i].targetNodeID == eachCircle.id) ) {
       console.log(true);
       return true;
     }

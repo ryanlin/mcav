@@ -1,4 +1,5 @@
 numpy
 bagpy
+pandas
 cvxpy
 cvxopt
