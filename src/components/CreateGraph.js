@@ -316,7 +316,11 @@ const CreateGraph = () => {
         </Layer>
       </Stage>
       <button
-        onClick={console.log("button clicked")}
+        onClick={() => {
+          console.log("button clicked")
+          var output = window.api.test("test", circles, connectors);
+          console.log(window.api.test2);
+        }}
         style={{
           position: 'absolute',
           top: 100,

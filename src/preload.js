@@ -65,7 +65,8 @@ contextBridge.exposeInMainWorld(
 		if( validChannels.includes(channel)) {
 			saveGraph(jsonPath);
 		}
-	}
+	},
+  test2: test2()
   }
 )
 
@@ -77,6 +78,10 @@ function test(nodes, edges) {
   frontendGraph.nodes = JSON.parse(JSON.stringify(nodes));
   frontendGraph.edges = JSON.parse(JSON.stringify(edges));
   console.log(JSON.stringify(frontendGraph));
+}
+
+function test2() {
+  return(JSON.stringify(frontendGraph));
 }
 
 function clearGraph() {
