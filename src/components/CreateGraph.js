@@ -25,6 +25,7 @@ const CreateGraph = () => {
   var [connectors, setConnectors] = React.useState(INITIAL_STATE);
   var [fromShapeId, setFromShapeId] = React.useState(null);
   var [displayID, setDisplayID] = React.useState("N/A");
+  var [saveFile, setSaveFile] = useState("null");
 
   // Handlers
   const handleFileUpload = e => {
@@ -49,6 +50,7 @@ const CreateGraph = () => {
     }, []);
     //console.log(fullGraph);
     api.calibration("calibration", fullGraph);
+    setSaveFile(fullGraph);
   }
 
   const selectTopic = (e) => {
@@ -279,7 +281,7 @@ const CreateGraph = () => {
 
           <Text
             x={30}
-            y={400}
+            y={395}
             fontSize={20}
             text={"Sensor Type: " + displayID}
             fill="black"
@@ -426,11 +428,30 @@ const CreateGraph = () => {
           borderRadius: "12px",
           color: "white",
           position: 'absolute',
-          top: 570,
-          left: 65
+          top: 530,
+          left: 63
         }}
         >
           Calibrate!
+      </button>
+
+      <button
+        onClick={() => {
+          const fileData = JSON.stringify(saveFile, null, 4);
+          const blob = new Blob([fileData], {type: "text/plain"});
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.download = 'filename.json';
+          link.href = url;
+          link.click();
+        }}
+        style={{
+          position: 'absolute',
+          top: 590,
+          left: 79
+        }}
+        >
+          Save Graph
       </button>
     </div>
   );
