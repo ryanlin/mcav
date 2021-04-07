@@ -2,7 +2,7 @@ import React, { useState, useRef, useForm } from 'react';
 import { render } from 'react-dom';
 import {Rect, Stage, Layer, Text, Circle, Arrow, Group, Line, Label, Tag} from 'react-konva';
 const {api} = window;
-import * as actionListeners from "./functions.js";
+import * as actionListeners from "../functions.js";
 
 const circ_radius = 40;
 
