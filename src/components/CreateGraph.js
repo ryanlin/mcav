@@ -329,6 +329,7 @@ const CreateGraph = () => {
         onChange={handleFileUpload}
       >
       </input>
+
       <button
         onClick={() => {
           console.log(fileState.path);
@@ -341,6 +342,7 @@ const CreateGraph = () => {
       >
         Import bag file
       </button>
+
       <select
         id={"topicSelect"}
         onChange = {(e) => {
@@ -356,6 +358,24 @@ const CreateGraph = () => {
         <option>Topic1</option>
         <option>Topic2</option>
       </select>
+
+      <button
+        onClick={() => {
+          console.log("calibrating...");
+        }}
+        style={{
+          backgroundColor: "green",
+          fontSize: "16px",
+          padding: "10px 24px",
+          borderRadius: "12px",
+          color: "white",
+          position: 'absolute',
+          top: 570,
+          left: 65
+        }}
+        >
+          Calibrate!
+      </button>
     </div>
   );
 };
