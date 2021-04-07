@@ -16,7 +16,7 @@ class App extends React.Component {
           </Switch>
 
           <br/>
-          <Link to="create_graph">{window.api.name}</Link>
+          <Link to="create_graph">Create Graph</Link>
         </Router>
       </div>
     );
