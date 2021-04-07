@@ -1,8 +1,12 @@
 import React, { useState, useRef, useForm } from 'react';
 import { render } from 'react-dom';
 import {Rect, Stage, Layer, Text, Circle, Arrow, Group, Line, Label, Tag} from 'react-konva';
+const {api} = window;
+import * as actionListeners from "./functions.js";
 
-const circ_radius = 40
+const circ_radius = 40;
+
+var topicList = [];
 
 const CreateGraph = () => {
   var [circles, setCircles] = useState([]);
@@ -47,7 +51,7 @@ const CreateGraph = () => {
               layer.find('.deleteMe').destroy();
               setConnectors([]);
               setCircles([]);
-              window.api.clearGraph("clearGraph");
+              api.clearGraph("clearGraph");
               fromShapeId = null;
               displayID = "N/A";
               layer.draw();
@@ -96,7 +100,7 @@ const CreateGraph = () => {
             onClick={(e) => {
               var layer = layerRef.current;
               layer.find('Arrow').destroy();
-              window.api.clearEdges("clearEdges");
+              api.clearEdges("clearEdges");
               setConnectors([]);
               layer.draw();
             }}
@@ -290,7 +294,7 @@ const CreateGraph = () => {
                   setFromShapeId(eachCircle.id);
                   setDisplayID(eachCircle.sensorType);
                   //console.log(JSON.stringify(circles));
-                  window.api.test("test", circles, connectors);
+                  api.test("test", circles, connectors);
                 }
               }}
               onMouseOver={() => {
@@ -333,6 +337,7 @@ const CreateGraph = () => {
       <button
         onClick={() => {
           console.log(fileState.path);
+          api.rosbag("rosbag", fileState.path);
         }}
         style={{
           position: 'absolute',
@@ -362,6 +367,7 @@ const CreateGraph = () => {
       <button
         onClick={() => {
           console.log("calibrating...");
+          actionListeners.handleClick(circles);
         }}
         style={{
           backgroundColor: "green",
@@ -379,6 +385,20 @@ const CreateGraph = () => {
     </div>
   );
 };
+
+api.receive("clear", (res) => {
+  console.log('recieved');
+  console.log(res);
+}, []);
+
+api.receive("bagfile", (res) => {
+  console.log("bagfile recieved");
+  topicList = JSON.parse(JSON.stringify(res));
+  console.log(topicList);
+
+  // TAIGA ADD TOPICS TO DROP DOWN MENU //
+
+}, []);
 
 function checkEdges(fromShapeId, eachCircle, edges) {
   for(var i = 0; i < edges.length; i++ ){

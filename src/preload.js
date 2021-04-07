@@ -1,4 +1,4 @@
-const { contextBridge } = require("electron");
+const { contextBridge, ipcRenderer } = require("electron");
 var { PythonShell } = require('python-shell');
 let fs = require('fs');
 //var { actionListeners } = require('electron').remote.require("./functions.js");
@@ -66,7 +66,28 @@ contextBridge.exposeInMainWorld(
 			saveGraph(jsonPath);
 		}
 	},
-  test2: test2()
+  test2: test2(),
+  send: (channel, ...data) => {
+    const allowedChannels = ["check", "confirm"];
+    if(allowedChannels.includes(channel)) {
+      console.log('send');
+      ipcRenderer.send(channel, ...data);
+    }
+  },
+  send2: (channel) => {
+    const allowedChannels = ["check", "confirm"];
+    if(allowedChannels.includes(channel)) {
+      console.log('send2');
+      ipcRenderer.send(channel, frontendGraph);
+    }
+  },
+  receive: (channel, cb) => {
+    const allowedChannels = ["clear", "req"];
+    if(allowedChannels.includes(channel)) {
+      console.log('calling reciever');
+      ipcRenderer.on(channel, (event, ...args) => cb(...args));
+    }
+  }
   }
 )
 
@@ -113,35 +134,36 @@ function rosbagRun(input) {
   console.log(input);
   if( input.substring(input.length-4, input.length) != ".bag" )
   {
-	importResult.textContent = "Import Failed: imported file is not a rosbag file";
-	importBtn.className = "btn btn-secondary ld-over";
-	importBtn.addEventListener('click', importBagFileListener );
+  	console.log("Import Failed: imported file is not a rosbag file");
   }
   else
   {
 	  rosbagPath = input;
-	  numOfEdges = numOfNodes - 1;
 
-	  clearBagFileTable();
 	  let options = {
 		mode: 'text',
 		args: [input]
 	  };
 
-	  PythonShell.run('python/bagpy_list_topics.py', options, function (err, results) {
-		importBtn.className = "btn btn-secondary ld-over";
-		importBtn.addEventListener('click', importBagFileListener );
+	  PythonShell.run('src/python/bagpy_list_topics.py', options, function (err, results) {
+		//importBtn.className = "btn btn-secondary ld-over";
+		//importBtn.addEventListener('click', importBagFileListener );
 		if(err) {
-			importResult.textContent = "Import Failed: " + err.toString();
+			//importResult.textContent = "Import Failed: " + err.toString();
+      console.log("Import Failed: " + err.toString());
 			throw err;
 		}
 		else {
-			importResult.textContent = "Import Successful";
+			//importResult.textContent = "Import Successful";
+      console.log("Import Successful");
 			topicList = [];
 
 			findTopics(results);
+      console.log(topicList);
+      ipcRenderer.send("bagfile", topicList);
 			for( var i = 0; i < numOfNodes; i++ ) {
-				fillNodeList(i);
+				//fillNodeList(i);
+        //console.log()
 			}
 		}
 	  });
