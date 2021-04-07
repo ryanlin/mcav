@@ -60,6 +60,12 @@ contextBridge.exposeInMainWorld(
 			calPlusJson(topicList);
 		}
 	},
+  calibration: (channel, inputGraph) => {
+    let validChannels = ["calibration"];
+    if( validChannels.includes(channel)) {
+      calibration(inputGraph);
+    }
+  },
 	saveGraph: (channel, jsonPath) => {
 		let validChannels = ["saveGraph"];
 		if( validChannels.includes(channel)) {
@@ -82,7 +88,7 @@ contextBridge.exposeInMainWorld(
     }
   },
   receive: (channel, cb) => {
-    const allowedChannels = ["clear", "req"];
+    const allowedChannels = ["clear", "req", "bagfile", "calibration"];
     if(allowedChannels.includes(channel)) {
       console.log('calling reciever');
       ipcRenderer.on(channel, (event, ...args) => cb(...args));
@@ -202,8 +208,8 @@ function calPlusJson(topicList)
 
 function createJsonFrontEnd(rosPath, topicList) {
 
-   	frontendGraph.numberOfNodes = numOfNodes;
-    frontendGraph.numberOfEdges = numOfEdges;
+  frontendGraph.numberOfNodes = numOfNodes;
+  frontendGraph.numberOfEdges = numOfEdges;
 	frontendGraph.nodes = [];
 	frontendGraph.edges = [];
 
@@ -240,6 +246,66 @@ function createJsonFrontEndTestFile(rosPath, topicList) {
 	fs.writeFile("output_json/frontend_test.json", dictString, function(err, result) {
     	if(err) console.log('error', err);
 	});
+}
+
+function calibration(inputGraph) {
+
+  //clearCalTable();
+  console.log("checking");
+  console.log(inputGraph);
+	if( inputGraph.numberOfNodes == undefined || inputGraph.numberOfNodes == 0 || inputGraph.numberOfNodes == 1 )
+	{
+		//const calBtn = document.getElementById("calBtn");
+		//calBtn.className = "btn btn-primary ld-over";
+		//calBtn.addEventListener('click', calibrateListener );
+		//calResult.textContent = "GRAPH ERROR: Need at least 2 nodes with 1 edge between them.";
+    console.log("GRAPH ERROR: Need at least 2 nodes with 1 edge between them.");
+	}
+	else
+	{
+    frontendGraph = inputGraph;
+    console.log(frontendGraph);
+    ipcRenderer.send("calibration", frontendGraph);
+		var jsonStr = JSON.stringify(inputGraph);
+
+		let options = {
+			mode: 'text',
+			args: [jsonStr]
+		};
+
+/*
+		PythonShell.run('Backend/calibration_service/calibration_service.py', options, function (err, results) {
+			// const calBtn = document.getElementById("calBtn");
+			// calBtn.className = "btn btn-primary ld-over";
+			// calBtn.addEventListener('click', calibrateListener );
+			if (err) {
+				//calResult.textContent = "Calibration ERROR: " + err.toString();
+        console.log("CALIBRATION ERROR: " + err.toString());
+				throw err;
+			}
+			else {
+				// calResult.textContent = "Calibration SUCCESS: ";
+				// resultTable.innerHTML += '<tr><td>' + "Output: " + '</td></tr>';
+				//TO DO: Debug bagreader so that it doesnt print anything while reading bag files//
+				var matrixResults = [];
+				for( var i = 2; i < results.length; i++ ) {
+				  //resultTable.innerHTML += '<tr><td>' + results[i] + '</td></tr>';
+				  matrixResults.push( results[i] );
+				}
+
+				matrixResults[0] = matrixResults[0].replaceAll("\'", "\"");
+				matrixResults[0] = matrixResults[0].replaceAll("True", "true");
+				matrixResults[0] = matrixResults[0].replaceAll("False", "false");
+
+				var matr = matrixResults[0];
+
+				backendGraph = JSON.parse(matr);
+
+				createFullGraph();
+			}
+		});
+    */
+	}
 }
 
 function calibrateUsingJson() {
