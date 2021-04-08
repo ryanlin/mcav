@@ -8,12 +8,16 @@ import { DropDown, CalibrationPanels } from './panels';
 const TEST_CALIBRATIONS = {
   "edges": [
     {
+      "x": 235,
+      "y": 30,
       "id": 0,
       "calibrationSucceeded": true,
       "matrix": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
       "errScore": 0.05
     },
     {
+      "x": 235,
+      "y": 150,
       "id": 1,
       "calibrationSucceeded": true,
       "matrix": [11, 12, 13, 14, 15, 16, 17, 18, 19, 110],
@@ -44,6 +48,7 @@ const CreateGraph = () => {
   var [displayID, setDisplayID] = React.useState("N/A");
   var [saveFile, setSaveFile] = useState("null");
   const [calibrations, setCalibrations] = useState(TEST_CALIBRATIONS);
+  var [panelVisible, setPanelVisible] = useState(false);
 
   // Handlers
   const handleFileUpload = e => {
@@ -325,7 +330,10 @@ const CreateGraph = () => {
 
           {calibrations.edges.map((edge) => (
             <CalibrationPanels
+              x={edge.x}
+              y={edge.y}
               matrix={edge.matrix}
+              visible={panelVisible}
             />
           ))}
 
@@ -475,6 +483,18 @@ const CreateGraph = () => {
           position: 'absolute',
           top: 590,
           left: 79
+        }}
+        >
+          Save Graph
+      </button>
+      <button
+        onClick={() => {
+          setPanelVisible(true);
+        }}
+        style={{
+          position: 'absolute',
+          top: 200,
+          left: 200
         }}
         >
           Save Graph
