@@ -303,6 +303,8 @@ const CreateGraph = () => {
             fill="red"
           />
 
+          <CalibrationPanels></CalibrationPanels>
+
           {circles.map((eachCircle) => (
             <Circle
               name={eachCircle.name}
