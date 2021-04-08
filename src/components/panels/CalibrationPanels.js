@@ -7,6 +7,10 @@ function CalibrationPanels(props) {
   return (
     <Group
       draggable
+      onDblClick={() => {
+        navigator.clipboard.writeText(props.matrix.join());
+        alert("Matrix Copied");
+      }}
     >
       <Rect
         x={285}
