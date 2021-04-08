@@ -286,7 +286,8 @@ function calibration(inputGraph) {
         console.log(calResult);
         console.log(calResult[0]);
         console.log(calResult[0].matrix);
-        ipcRenderer.send("calibration", results[2]);
+
+        ipcRenderer.send("calibration", calResult);
 				// calResult.textContent = "Calibration SUCCESS: ";
 				// resultTable.innerHTML += '<tr><td>' + "Output: " + '</td></tr>';
 				//TO DO: Debug bagreader so that it doesnt print anything while reading bag files//
