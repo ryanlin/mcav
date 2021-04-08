@@ -20,7 +20,7 @@ function CalibrationPanels(props) {
         x={285}
         y={35}
         fontSize={14}
-        text={"somtext"}
+        text={props.matrix.join()}
       />
     </Group>
 

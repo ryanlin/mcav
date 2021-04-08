@@ -5,6 +5,23 @@ const {api} = window;
 import * as actionListeners from "../functions.js";
 import { DropDown, CalibrationPanels } from './panels';
 
+const TEST_CALIBRATIONS = {
+  "edges": [
+    {
+      "id": 0,
+      "calibrationSucceeded": true,
+      "matrix": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      "errScore": 0.05
+    },
+    {
+      "id": 1,
+      "calibrationSucceeded": true,
+      "matrix": [11, 12, 13, 14, 15, 16, 17, 18, 19, 110],
+      "errScore": 0.005
+    }
+  ]
+}
+
 const INITIAL_STATE = [];
 const INITIAL_CALIBRATIONS = {
   "edges": []
@@ -26,6 +43,7 @@ const CreateGraph = () => {
   var [fromShapeId, setFromShapeId] = React.useState(null);
   var [displayID, setDisplayID] = React.useState("N/A");
   var [saveFile, setSaveFile] = useState("null");
+  const [calibrations, setCalibrations] = useState(TEST_CALIBRATIONS);
 
   // Handlers
   const handleFileUpload = e => {
@@ -303,7 +321,11 @@ const CreateGraph = () => {
             fill="red"
           />
 
-          <CalibrationPanels></CalibrationPanels>
+          {calibrations.edges.map((edge) => (
+            <CalibrationPanels
+              matrix={edge.matrix}
+            />
+          ))}
 
           {circles.map((eachCircle) => (
             <Circle
