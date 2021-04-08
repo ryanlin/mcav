@@ -46,7 +46,8 @@ const CreateGraph = () => {
     };
     api.receive("calibration", (res) => {
       console.log("calibration recieved");
-      console.log(res);
+      mergeCalibrationOutputs(connectors, res);
+      console.log(connectors);
     }, []);
     //console.log(fullGraph);
     api.calibration("calibration", fullGraph);
@@ -456,6 +457,20 @@ const CreateGraph = () => {
     </div>
   );
 };
+
+function mergeCalibrationOutputs(edgeList, calibrationOutput) {
+  console.log(edgeList);
+  console.log(calibrationOutput);
+  edgeList.forEach( edge => {
+    calibrationOutput.forEach( output => {
+      if( output.id == edge.id ) {
+        edge.calibrationSucceeded = output.calibrationSucceeded;
+        edge.matrix = output.matrix;
+        edge.errScore = output.errScore;
+      }
+    });
+  });
+}
 
 api.receive("clear", (res) => {
   console.log('recieved');
