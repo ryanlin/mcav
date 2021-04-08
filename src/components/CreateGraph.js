@@ -356,16 +356,32 @@ const CreateGraph = () => {
             fill="red"
           />
 
-          {calibrations.map((edge) => (
+          {calibrations.map((edge) => {
+
+            var newMatrix = [];
+            var stringMatrix = [];
+            if( edge.matrix != null ) {
+              newMatrix = edge.matrix;
+              for( var i = 1; i <= newMatrix.length; i++ ) {
+                  stringMatrix.push((Math.floor(newMatrix[i-1] * 1000) / 1000).toString());
+                  if( i % 4 == 0 ) {
+                    stringMatrix[i-1] += "\n";
+                  }
+              }
+            }
+
+            return (
             //if(edge.matrix != null) {
+            //var newMatrix = edge.matrix ? edge.matrix : [];
               <CalibrationPanels
                 x={edge.x}
                 y={edge.y}
-                matrix={edge.matrix ? edge.matrix : []}
+                matrix={stringMatrix}
                 visible={panelVisible}
               />
+            );
             //}
-          ))}
+          })}
 
           {circles.map((eachCircle) => (
             <Circle
@@ -547,13 +563,13 @@ function returnMatrixPosition(node1, node2) {
   var midpoint = getMidpoint(node1.x, node1.y, node2.x, node2.y);
   var position = midpoint;
   if( slope > 0 ) {
-    position.x -= 20;
+    position.x -= 40;
   }
   else if( slope < 0 ) {
-    position.x += 20;
+    position.x += 40;
   }
   else {
-    position.y += 20;
+    position.y += 40;
   }
   console.log(position);
   return position;
