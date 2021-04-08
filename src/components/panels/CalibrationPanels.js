@@ -23,11 +23,13 @@ function CalibrationPanels(props) {
       />
       <Text
         fontSize={14}
-        text={props.matrix.join()}
+        text={"test"}
+        text={props.matrix}
+        //test={props.matrix}
       />
     </Group>
 
   )
 }
 
-export default CalibrationPanels; 
+export default CalibrationPanels;

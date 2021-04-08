@@ -5,26 +5,7 @@ const {api} = window;
 import * as actionListeners from "../functions.js";
 import { DropDown, CalibrationPanels } from './panels';
 
-const TEST_CALIBRATIONS = {
-  "edges": [
-    {
-      "x": 235,
-      "y": 30,
-      "id": 0,
-      "calibrationSucceeded": true,
-      "matrix": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-      "errScore": 0.05
-    },
-    {
-      "x": 235,
-      "y": 150,
-      "id": 1,
-      "calibrationSucceeded": true,
-      "matrix": [11, 12, 13, 14, 15, 16, 17, 18, 19, 110],
-      "errScore": 0.005
-    }
-  ]
-}
+const TEST_CALIBRATIONS = [];
 
 const INITIAL_STATE = [];
 const INITIAL_CALIBRATIONS = {
@@ -93,7 +74,31 @@ const CreateGraph = () => {
         connector.y = position.y;
       });
 
+      //CHANGE Matrix Panels//
       console.log(connectors);
+
+      setCalibrations(connectors);
+
+      setPanelVisible(true);
+      /*
+      connectors.forEach( connector => {
+        const newCalibration = {
+          x: connector.x,
+          y: connector.y,
+          matrix: connector.matrix,
+          visible: true
+        };
+        setCalibrations(calibrations.concat([newCalibration]));
+        // <CalibrationPanels
+        //   x={edge.x}
+        //   y={edge.y}
+        //   matrix={edge.matrix}
+        //   visible={panelVisible}
+        // />
+      });
+      console.log(calibrations);
+      console.log(connectors);
+      */
 
     }, []);
     //console.log(fullGraph);
@@ -351,13 +356,15 @@ const CreateGraph = () => {
             fill="red"
           />
 
-          {calibrations.edges.map((edge) => (
-            <CalibrationPanels
-              x={edge.x}
-              y={edge.y}
-              matrix={edge.matrix}
-              visible={panelVisible}
-            />
+          {calibrations.map((edge) => (
+            //if(edge.matrix != null) {
+              <CalibrationPanels
+                x={edge.x}
+                y={edge.y}
+                matrix={edge.matrix ? edge.matrix : []}
+                visible={panelVisible}
+              />
+            //}
           ))}
 
           {circles.map((eachCircle) => (
@@ -506,18 +513,6 @@ const CreateGraph = () => {
           position: 'absolute',
           top: 590,
           left: 79
-        }}
-        >
-          Save Graph
-      </button>
-      <button
-        onClick={() => {
-          setPanelVisible(true);
-        }}
-        style={{
-          position: 'absolute',
-          top: 200,
-          left: 200
         }}
         >
           Save Graph
