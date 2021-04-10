@@ -31,39 +31,44 @@ class Graph:
 
         for message_node in message_nodes:
             if message_node["id"] in self.nodes:
-                raise ValueError("Cannot have multiple nodes with the same id")
+                raise ValueError(
+                    "Cannot have multiple nodes with the same id: " + str(message_node["id"]))
 
             self.nodes[message_node["id"]] = NodeInformation(message_node["type"],
                                                              message_node["topic"],
                                                              message_node["rosbagPath"])
 
             if self.nodes[message_node["id"]].type not in ["pose"]:
-                raise ValueError("Must provide valid sensor type")
+                raise ValueError(
+                    "Must provide valid sensor type: " + str(message_node["id"]))
 
             if '/' not in self.nodes[message_node["id"]].topic:
-                raise ValueError("Must provide sensor topic")
+                raise ValueError("Must provide sensor topic: " +
+                                 str(message_node["id"]))
 
             if not self.nodes[message_node["id"]].rosbag_path:
-                raise ValueError("Must provide valid sensor rosbag_path")
+                raise ValueError(
+                    "Must provide valid sensor rosbag_path: " + str(message_node["id"]))
 
         encountered_nodes = set()
 
         for message_edge in message_edges:
             if message_edge["id"] in self.edges:
-                raise ValueError("Cannot have multiple edges with the same id")
+                raise ValueError(
+                    "Cannot have multiple edges with the same id: " + str(message_edge["id"]))
 
             if message_edge["sourceNodeID"] not in self.nodes:
                 raise ValueError(
-                    "Source node ID does not exist in the list of nodes")
+                    "Source node ID does not exist in the list of nodes: " + str(message_edge["id"]))
 
             if message_edge["targetNodeID"] not in self.nodes:
                 raise ValueError(
-                    "Target node ID does not exist in the list of nodes")
+                    "Target node ID does not exist in the list of nodes: " + str(message_edge["id"]))
 
             for edge in self.edges.values():
                 if message_edge["sourceNodeID"] == edge.source_node_id and message_edge["targetNodeID"] == edge.target_node_id:
                     raise ValueError(
-                        "Cannot have two or more edges pointing between the same source and target nodes")
+                        "Cannot have two or more edges pointing between the same source and target nodes: " + str(message_edge["id"]))
 
             self.edges[message_edge["id"]] = EdgeInformation(message_edge["sourceNodeID"],
                                                              message_edge["targetNodeID"])
