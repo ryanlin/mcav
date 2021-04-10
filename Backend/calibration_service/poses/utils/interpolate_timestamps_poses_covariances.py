@@ -29,6 +29,11 @@ def interpolate_timestamps_poses_covariances(timestamp_target: np.ndarray,
         else:
             # Compute t between two timestamps
             timeLength = timestamp_interp[j] - timestamp_interp[i]
+            if timeLength == 0.0:
+                i += 1
+                j += 1
+                continue
+
             timeInterval = timestamp_target[h] - timestamp_interp[i]
             t = float(timeInterval) / float(timeLength)
 
