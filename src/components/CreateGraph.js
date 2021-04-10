@@ -5,6 +5,8 @@ const {api} = window;
 import * as actionListeners from "../functions.js";
 import { DropDown, CalibrationPanels } from './panels';
 
+const TEST_CALIBRATIONS = [];
+
 const INITIAL_STATE = [];
 const INITIAL_CALIBRATIONS = {
   "edges": []
@@ -26,6 +28,8 @@ const CreateGraph = () => {
   var [fromShapeId, setFromShapeId] = React.useState(null);
   var [displayID, setDisplayID] = React.useState("N/A");
   var [saveFile, setSaveFile] = useState("null");
+  const [calibrations, setCalibrations] = useState(TEST_CALIBRATIONS);
+  var [panelVisible, setPanelVisible] = useState(false);
 
   // Handlers
   const handleFileUpload = e => {
@@ -49,6 +53,53 @@ const CreateGraph = () => {
 
       mergeCalibrationOutputs(connectors, res);
       console.log(connectors);
+
+      connectors.forEach( connector => {
+        console.log(connector);
+        var sourceNode, targetNode;
+        circles.forEach( circle => {
+          console.log(circle);
+          if( circle.id == connector.sourceNodeID ) {
+            sourceNode = circle;
+            console.log(sourceNode);
+          }
+          else if( circle.id == connector.targetNodeID ) {
+            targetNode = circle;
+            console.log(targetNode);
+          }
+        });
+        var position = returnMatrixPosition(sourceNode, targetNode);
+        console.log(position);
+        connector.x = position.x;
+        connector.y = position.y;
+      });
+
+      //CHANGE Matrix Panels//
+      console.log(connectors);
+
+      setCalibrations(connectors);
+
+      setPanelVisible(true);
+      /*
+      connectors.forEach( connector => {
+        const newCalibration = {
+          x: connector.x,
+          y: connector.y,
+          matrix: connector.matrix,
+          visible: true
+        };
+        setCalibrations(calibrations.concat([newCalibration]));
+        // <CalibrationPanels
+        //   x={edge.x}
+        //   y={edge.y}
+        //   matrix={edge.matrix}
+        //   visible={panelVisible}
+        // />
+      });
+      console.log(calibrations);
+      console.log(connectors);
+      */
+
     }, []);
     //console.log(fullGraph);
     api.calibration("calibration", fullGraph);
@@ -305,6 +356,33 @@ const CreateGraph = () => {
             fill="red"
           />
 
+          {calibrations.map((edge) => {
+
+            var newMatrix = [];
+            var stringMatrix = [];
+            if( edge.matrix != null ) {
+              newMatrix = edge.matrix;
+              for( var i = 1; i <= newMatrix.length; i++ ) {
+                  stringMatrix.push((Math.floor(newMatrix[i-1] * 1000) / 1000).toString());
+                  if( i % 4 == 0 ) {
+                    stringMatrix[i-1] += "\n";
+                  }
+              }
+            }
+
+            return (
+            //if(edge.matrix != null) {
+            //var newMatrix = edge.matrix ? edge.matrix : [];
+              <CalibrationPanels
+                x={edge.x}
+                y={edge.y}
+                matrix={stringMatrix}
+                visible={panelVisible}
+              />
+            );
+            //}
+          })}
+
           {circles.map((eachCircle) => (
             <Circle
               name={eachCircle.name}
@@ -477,6 +555,39 @@ api.receive("clear", (res) => {
   console.log('recieved');
   console.log(res);
 }, []);
+
+function returnMatrixPosition(node1, node2) {
+  console.log(node1);
+  console.log(node2);
+  var slope = getSlope(node1.x, node1.y, node2.x, node2.y);
+  var midpoint = getMidpoint(node1.x, node1.y, node2.x, node2.y);
+  var position = midpoint;
+  if( slope > 0 ) {
+    position.x -= 40;
+  }
+  else if( slope < 0 ) {
+    position.x += 40;
+  }
+  else {
+    position.y += 40;
+  }
+  console.log(position);
+  return position;
+}
+
+function getMidpoint(x1, y1, x2, y2) {
+  var midpoint = new Object();
+  midpoint.x=(x1+(x2-x1)*0.50);
+  midpoint.y=(y1+(y2-y1)*0.50);
+  console.log(midpoint);
+  return midpoint;
+}
+
+function getSlope(x1, y1, x2, y2) {
+    var slope = (y2 - y1) / (x2 - x1);
+    console.log(slope);
+    return slope;
+}
 
 // api.receive("bagfile", (res) => {
 //   console.log("bagfile recieved");

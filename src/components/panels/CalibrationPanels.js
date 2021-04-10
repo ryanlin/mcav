@@ -1,47 +1,35 @@
-import React from 'react';
-import { useState } from 'react';
-import { Group, Layer, Rect } from 'react-konva';
-
-const INITIAL_PANEL_PROPS = [
-  {
-    id:0
-  },
-  {
-    id:2
-  }
-]
+import React from "react";
+import { Rect, Text, Stage, Layer, Circle, Arrow, Group, Line, Label, Tag} from 'react-konva';
 
 function CalibrationPanels(props) {
-  const calibrations = props.calibrations
-  const edges = props.edges
 
-  const CalibrationPanel = (props) => {
-    return(
-      <Group>
-        <Rect
-          x={props.x}
-          y={props.y}
-        />
-        <Text>{props.x}</Text>
-      </Group>
-    )
-  };
-  
-  // console.log(calibrations)
-  // console.log(edges)
+
   return (
-    <Layer>
-      {
-        calibrations.edges.map( (calibedge) => (
-          <CalibrationPanel
-            x={edges[calibedge.id].sourceNode}
-            y={edges[calibedge.id].sourceNode}
-          />
-        ))
-      }
-    </Layer>
+    <Group
+      draggable
+      x={props.x}
+      y={props.y}
+      onDblClick={() => {
+        navigator.clipboard.writeText(props.matrix.join());
+        alert("Matrix Copied");
+      }}
+      visible={props.visible}
+    >
+      <Rect
+        width={200}
+        height={100}
+        fill="orange"
+        cornerRadius={10}
+      />
+      <Text
+        fontSize={14}
+        text={"test"}
+        text={props.matrix}
+        //test={props.matrix}
+      />
+    </Group>
+
   )
 }
-
 
 export default CalibrationPanels;
