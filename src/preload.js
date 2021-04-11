@@ -151,7 +151,7 @@ function rosbagRun(input) {
 		args: [input]
 	  };
 
-	  PythonShell.run('src/python/bagpy_list_topics.py', options, function (err, results) {
+	  PythonShell.run('Backend/extract_topics/bagpy_list_topics.py', options, function (err, results) {
 		//importBtn.className = "btn btn-secondary ld-over";
 		//importBtn.addEventListener('click', importBagFileListener );
 		if(err) {
