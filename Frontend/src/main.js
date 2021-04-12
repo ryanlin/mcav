@@ -49,18 +49,11 @@ app.on('activate', () => {
   }
 });
 
-ipcMain.on("confirm", (event, data) => {
-  console.log("sending reply");
-  window.webContents.send("clear", data);
-})
-
 ipcMain.on("bagfile", (event, data) => {
-  console.log("Sending bag file");
   window.webContents.send("bagfile", data);
 })
 
 ipcMain.on("calibration", (event, data) => {
-  console.log("Calibration obtained");
   window.webContents.send("calibration", data);
 })
 
