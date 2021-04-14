@@ -2,10 +2,9 @@ import React, { useState, useRef, useForm } from 'react';
 import { render } from 'react-dom';
 import {Rect, Stage, Layer, Text, Circle, Arrow, Group, Line, Label, Tag} from 'react-konva';
 const {api} = window;
-import { Toolbar, NodePanel, CanvasButton, SensorNode, DropDown, CalibrationPanels } from './panels';
+import { Toolbar, NodePanel, CanvasButton, NodeTool, DropDown, CalibrationPanels } from './panels';
 
 const INITIAL_STATE = [];
-
 const circ_radius = 40;
 
 var topicList = [];
@@ -113,7 +112,6 @@ const CreateGraph = () => {
     layer.draw();
   }
 
-
   const onMouseOverButton = (e, color) => {
     var stage = stageRef.current;
     stage.container().style.cursor = 'pointer';
@@ -135,6 +133,57 @@ const CreateGraph = () => {
     tag[0].setAttr('fill', color);
     layer.draw();
   }
+
+  const addGPSCircle = (e) => {
+    const newCircle = {
+      name: "deleteMe",
+      x: e.target.x(),
+      y: e.target.y(),
+      id: circles.length,
+      sensorType: "gps",
+      type: "pose",
+      topic: "null"
+    }; // New circle properties : dictionary
+
+    // Add circle to circles hook
+    setCircles(circles.concat([newCircle]));
+
+    // Reset node Tool position
+    var layer = layerRef.current;
+    var draggableCircle = layer.findOne(".draggableCircle");
+    draggableCircle.position({ x: 140, y: 180 });
+  }
+
+  const addLidarCircle = (e) => {
+    const newCircle = {
+      name: "deleteMe",
+      x: e.target.x(),
+      y: e.target.y(),
+      id: circles.length,
+      sensorType: "lidar",
+      type: "pose",
+      topic: "null"
+    }; // New circle properties : dictionary
+
+    // Add circle to circles hook
+    setCircles(circles.concat([newCircle]));
+
+    // Reset node Tool position
+    var layer = layerRef.current;
+    var draggableCircle = layer.findOne(".draggableCircle2");
+    draggableCircle.position({ x: 140, y: 285 });
+  }
+
+  const onMouseOverNodeTool = () => {
+    var stage = stageRef.current;
+    stage.container().style.cursor = 'move';
+  }
+
+  const onMouseOutNodeTool = () => {
+    var stage = stageRef.current;
+    stage.container().style.cursor = 'default';
+  }
+
 
   return (
     <div>
@@ -170,82 +219,31 @@ const CreateGraph = () => {
           />
 
           {/* GPS Circle*/}
-
-          <SensorNode />          
-          <Circle
+          <NodeTool
             name="draggableCircle"
-            x={140}
-            y={180}
-            radius={circ_radius}
+            text="GPS"
+            text_pos={ {x:35, y:170} }
+            node_pos={ {x:140, y:180} }
             fill="green"
             stroke="blue"
             draggable
-            onDragEnd={(e) => {
-              const newCircle = {
-                name: "deleteMe",
-                x: e.target.x(),
-                y: e.target.y(),
-                id: circles.length,
-                sensorType: "gps",
-                type: "pose",
-                topic: "null"
-              };
-              setCircles(circles.concat([newCircle]));
-              console.log(circles.length);
-              var stage = stageRef.current;
-              var draggableCircle = stage.findOne(".draggableCircle");
-              draggableCircle.position({ x: 140, y: 180 });
-            }}
-            onMouseOver={() => {
-              var stage = stageRef.current;
-              stage.container().style.cursor = 'move';
-            }}
-            onMouseOut={() => {
-              var stage = stageRef.current;
-              stage.container().style.cursor = 'default';
-            }}
+            onDragEnd={addGPSCircle}
+            onMouseOver={onMouseOverNodeTool}
+            onMouseOut={onMouseOutNodeTool}
           />
 
           {/* Lidar Circle*/}
-          <Text
-            x={30}
-            y={275}
-            fontSize={20}
-            text={"LIDAR"}
-            fill="red"
-          />
-          <Circle
+          <NodeTool
             name="draggableCircle2"
-            x={140}
-            y={285}
-            radius={circ_radius}
+            text="LIDAR"
+            text_pos={ {x:30, y:275} }
+            node_pos={ {x:140, y:285} }
             fill="green"
             stroke="red"
             draggable
-            onDragEnd={(e) => {
-                const newCircle = {
-                  name: "deleteMe",
-                  x: e.target.x(),
-                  y: e.target.y(),
-                  id: circles.length,
-                  type: "pose",
-                  sensorType: "lidar",
-                  type: "pose",
-                  topic: "null"
-                };
-              setCircles(circles.concat([newCircle]));
-              var stage = stageRef.current;
-              var draggableCircle = stage.findOne(".draggableCircle2");
-              draggableCircle.position({ x: 140, y: 285 });
-            }}
-            onMouseOver={() => {
-              var stage = stageRef.current;
-              stage.container().style.cursor = 'move';
-            }}
-            onMouseOut={() => {
-              var stage = stageRef.current;
-              stage.container().style.cursor = 'default';
-            }}
+            onDragEnd={addLidarCircle}
+            onMouseOver={onMouseOverNodeTool}
+            onMouseOut={onMouseOutNodeTool}
           />
 
           {/* Render Calibration Panels*/}
@@ -289,20 +287,19 @@ const CreateGraph = () => {
               topic={eachCircle.topic}
               type={eachCircle.type}
               stroke={eachCircle.sensorType === "gps" ? "blue" : "red"}
-              // draggable={true}
-              /* onDblClick={(e) => {
-                e.target.destroy();
-                var stage = stageRef.current;
-                var a = stage.findOne('Rect');
-              }} */
+
               onClick={() => {
+                // If no selected circle, select this circle
+                // If selected circle is this circle, deselect
+                // Otherwise make edge with selected circle
                 if(fromShapeId != null) {
+                  // If already selected circle is the circle just clicked, deselect
                   if(fromShapeId == eachCircle.id) {
                     setFromShapeId(null);
                     setDisplayID("N/A");
                     eachCircle.topic = topic;
                     document.getElementById("topicSelect").selectedIndex = 0;
-                  }
+                  } // If already selected circle is another circle, make edge
                   else if( !checkEdges(fromShapeId, eachCircle, connectors) ) {
                     const newConnector = {
                       id: connectors.length,
@@ -312,23 +309,26 @@ const CreateGraph = () => {
                     setConnectors(connectors.concat([newConnector]));
                     setFromShapeId(null);
                   }
-                } else {
+                } else { // If no circle is already selected
                   setTopic(eachCircle.topic);
-                  var i;
-                  var a = document.getElementById("topicSelect");
-                  for(i = 0; i < a.options.length; i++) {
+                  var a = document.getElementById("topicSelect"); // Topics DropDown Menu
+                  for(var i = 0; i < a.options.length; i++) {
                     if(a.options[i].label == eachCircle.topic) {
                       a.selectedIndex = i;
                     }
                   }
+
+                  // Set this circle as selected circle
                   setFromShapeId(eachCircle.id);
                   setDisplayID(eachCircle.sensorType);
                 }
               }}
+
               onMouseOver={() => {
                 var stage = stageRef.current;
                 stage.container().style.cursor = 'pointer';
               }}
+
               onMouseOut={() => {
                 var stage = stageRef.current;
                 stage.container().style.cursor = 'default';
