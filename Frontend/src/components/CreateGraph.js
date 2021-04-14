@@ -2,33 +2,30 @@ import React, { useState, useRef, useForm } from 'react';
 import { render } from 'react-dom';
 import {Rect, Stage, Layer, Text, Circle, Arrow, Group, Line, Label, Tag} from 'react-konva';
 const {api} = window;
-import { DropDown, CalibrationPanels } from './panels';
-
-const TEST_CALIBRATIONS = [];
+import { Toolbar, NodePanel, DropDown, CalibrationPanels } from './panels';
+import ClearCanvasButton from './panels/ClearCanvasButton';
 
 const INITIAL_STATE = [];
-const INITIAL_CALIBRATIONS = {
-  "edges": []
-};
 
 const circ_radius = 40;
 
 var topicList = [];
 
 const CreateGraph = () => {
+  const [calibrations, setCalibrations] = useState(INITIAL_STATE);
   const [bagTopics, setBagTopics] = useState(INITIAL_STATE);
   const [fileState, setFileState] = useState("null");
   const [topic, setTopic] = useState("null");
+  var [saveFile, setSaveFile] = useState("null");
 
   const stageRef = useRef(null);
   const layerRef = useRef(null);
+
+  var [panelVisible, setPanelVisible] = useState(false);
   var [circles, setCircles] = useState(INITIAL_STATE);
   var [connectors, setConnectors] = React.useState(INITIAL_STATE);
   var [fromShapeId, setFromShapeId] = React.useState(null);
   var [displayID, setDisplayID] = React.useState("N/A");
-  var [saveFile, setSaveFile] = useState("null");
-  const [calibrations, setCalibrations] = useState(TEST_CALIBRATIONS);
-  var [panelVisible, setPanelVisible] = useState(false);
 
   // Handlers
   const handleFileUpload = e => {
@@ -87,79 +84,74 @@ const CreateGraph = () => {
     setTopic(e.target.value);
   }
 
+  const clearCanvas = () => {
+    var layer = layerRef.current;
+
+    // Delete all arrows and circles
+    layer.find('Arrow').destroy();
+    layer.find('.deleteMe').destroy();
+
+    // Set states to empty
+    setConnectors([]);
+    setCircles([]);
+
+    // Clear arrays in preload.js
+    api.clearGraph("clearGraph");
+
+    // Set selected nodes to empty
+    fromShapeId = null;
+    displayID = "N/A";
+
+    // Force rerender
+    layer.draw();
+  }
+
+  const onMouseOverButton = (e, color) => {
+    var stage = stageRef.current;
+    stage.container().style.cursor = 'pointer';
+    var layer = layerRef.current;
+    var tag = e.currentTarget.getChildren(function(node){
+      return node.getClassName() === 'Tag';
+    })
+    tag[0].setAttr('fill', color);
+    layer.draw();
+  }
+
+  const onMouseOutButton = (e, color) => {
+    var stage = stageRef.current;
+    stage.container().style.cursor = 'default';
+    var layer = layerRef.current;
+    var tag = e.currentTarget.getChildren(function(node){
+      return node.getClassName() === 'Tag';
+    })
+    tag[0].setAttr('fill', color);
+    layer.draw();
+  }
+
+
+
+
   return (
     <div>
       <Stage width={window.innerWidth} height={window.innerHeight} ref={stageRef}>
         <Layer ref={layerRef}>
-          <Rect
-            x={15}
-            y={35}
-            width={200}
-            height={300}
-            fill="gray"
-            cornerRadius={10}
-          />
-          <Rect
-            x={15}
-            y={375}
-            width={200}
-            height={250}
-            fill="gray"
-            cornerRadius={10}
-          />
-          <Label
+          {/*Toolbar*/}
+          <Toolbar />
+
+          {/*Panel*/}
+          <NodePanel />
+
+          {/* Clear Canvas Button*/}
+          <ClearCanvasButton
+            id="clear-canvas-Label"
             x={65}
             y={50}
-            onClick={(e) => {
-              console.log(JSON.stringify(circles));
-              var layer = layerRef.current;
-              layer.find('Arrow').destroy();
-              layer.find('.deleteMe').destroy();
-              setConnectors([]);
-              setCircles([]);
-              api.clearGraph("clearGraph");
-              fromShapeId = null;
-              displayID = "N/A";
-              layer.draw();
-            }}
-            onMouseOver={(e) => {
-              var stage = stageRef.current;
-              stage.container().style.cursor = 'pointer';
-              var layer = layerRef.current;
-              var tag = e.currentTarget.getChildren(function(node){
-                return node.getClassName() === 'Tag';
-              })
-              tag[0].setAttr('fill', 'red');
-              layer.draw();
-            }}
-            onMouseOut={(e) => {
-              var stage = stageRef.current;
-              stage.container().style.cursor = 'default';
-              var layer = layerRef.current;
-              var tag = e.currentTarget.getChildren(function(node){
-                return node.getClassName() === 'Tag';
-              })
-              tag[0].setAttr('fill', 'yellow');
-              layer.draw();
-            }}
-          >
-            <Tag
-              fill={"yellow"}
-              shadowColor={'black'}
-              shadowBlur={10}
-              shadowOffsetX={10}
-              shadowOffsetY={10}
-              shadowOpacity={0.5}
-              cornerRadius={10}
-            />
-            <Text
-              text={"Clear Canvas"}
-              fontFamily={"Calibri"}
-              fontSize={18}
-              padding={5}
-              fill={"black"}
-            />
-          </Label>
+            onClick={clearCanvas}
+            onMouseOver={ (e) => onMouseOverButton(e,'red')}
+            onMouseOut={(e) => onMouseOutButton(e, 'yellow')}
+          />
+
+          {/* Clear Edges Button*/}
           <Label
             x={70}
             y={95}
@@ -209,6 +201,7 @@ const CreateGraph = () => {
             />
           </Label>
 
+          {/* GPS Circle*/}
           <Circle
             name="draggableCircle"
             x={140}
@@ -243,6 +236,7 @@ const CreateGraph = () => {
             }}
           />
 
+          {/* Lidar Circle*/}
           <Circle
             name="draggableCircle2"
             x={140}
@@ -278,22 +272,6 @@ const CreateGraph = () => {
           />
 
           <Text
-            x={80}
-            y={10}
-            fontSize={20}
-            text="Toolbar"
-            fill="black"
-          />
-
-          <Text
-            x={80}
-            y={350}
-            fontSize={20}
-            text="Panel"
-            fill="black"
-          />
-
-          <Text
             x={30}
             y={395}
             fontSize={20}
@@ -317,6 +295,7 @@ const CreateGraph = () => {
             fill="red"
           />
 
+          {/* Render Calibration Panels*/}
           {calibrations.map((edge) => {
 
             var newMatrix = [];
@@ -344,6 +323,7 @@ const CreateGraph = () => {
             //}
           })}
 
+          {/* Render Circles*/}
           {circles.map((eachCircle) => (
             <Circle
               name={eachCircle.name}
@@ -403,6 +383,7 @@ const CreateGraph = () => {
             />
           ))}
 
+          {/* Render Edges*/}
           {connectors.map(con => {
             const sourceNodeID = circles.find(s => s.id === con.sourceNodeID);
             const targetNodeID = circles.find(s => s.id === con.targetNodeID);
@@ -413,11 +394,12 @@ const CreateGraph = () => {
                 points={[sourceNodeID.x, sourceNodeID.y, targetNodeID.x, targetNodeID.y]}
                 stroke="black"
               />
-
             );
           })}
         </Layer>
       </Stage>
+
+
       <input
         type={"file"}
         style={{
