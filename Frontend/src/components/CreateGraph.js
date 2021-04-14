@@ -2,7 +2,7 @@ import React, { useState, useRef, useForm } from 'react';
 import { render } from 'react-dom';
 import {Rect, Stage, Layer, Text, Circle, Arrow, Group, Line, Label, Tag} from 'react-konva';
 const {api} = window;
-import { Toolbar, NodePanel, CanvasButton, DropDown, CalibrationPanels } from './panels';
+import { Toolbar, NodePanel, CanvasButton, SensorNode, DropDown, CalibrationPanels } from './panels';
 
 const INITIAL_STATE = [];
 
@@ -144,7 +144,9 @@ const CreateGraph = () => {
           <Toolbar />
 
           {/*Panel*/}
-          <NodePanel />
+          <NodePanel
+            displayID={displayID}
+          />
 
           {/* Clear Canvas Button*/}
           <CanvasButton
@@ -168,6 +170,8 @@ const CreateGraph = () => {
           />
 
           {/* GPS Circle*/}
+
+          <SensorNode />          
           <Circle
             name="draggableCircle"
             x={140}
@@ -203,6 +207,13 @@ const CreateGraph = () => {
           />
 
           {/* Lidar Circle*/}
+          <Text
+            x={30}
+            y={275}
+            fontSize={20}
+            text={"LIDAR"}
+            fill="red"
+          />
           <Circle
             name="draggableCircle2"
             x={140}
@@ -235,30 +246,6 @@ const CreateGraph = () => {
               var stage = stageRef.current;
               stage.container().style.cursor = 'default';
             }}
-          />
-
-          <Text
-            x={30}
-            y={395}
-            fontSize={20}
-            text={"Sensor Type: " + displayID}
-            fill="black"
-          />
-
-          <Text
-            x={35}
-            y={170}
-            fontSize={20}
-            text={"GPS"}
-            fill="blue"
-          />
-
-          <Text
-            x={30}
-            y={275}
-            fontSize={20}
-            text={"LIDAR"}
-            fill="red"
           />
 
           {/* Render Calibration Panels*/}

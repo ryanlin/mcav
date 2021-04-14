@@ -3,7 +3,6 @@ import { Rect, Text, Stage, Layer, Circle, Arrow, Group, Line, Label, Tag} from 
 
 
 function Toolbar(props) {
-  
   return(
     <Group>
       {/* Toolbar Header */}
