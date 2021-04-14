@@ -2,8 +2,7 @@ import React, { useState, useRef, useForm } from 'react';
 import { render } from 'react-dom';
 import {Rect, Stage, Layer, Text, Circle, Arrow, Group, Line, Label, Tag} from 'react-konva';
 const {api} = window;
-import { Toolbar, NodePanel, DropDown, CalibrationPanels } from './panels';
-import ClearCanvasButton from './panels/ClearCanvasButton';
+import { Toolbar, NodePanel, CanvasButton, DropDown, CalibrationPanels } from './panels';
 
 const INITIAL_STATE = [];
 
@@ -35,7 +34,7 @@ const CreateGraph = () => {
       circle.rosbagPath = e.target.files[0].path;
     });
     console.log(circles);
-  };
+  }
 
   const onClickCalibrate = () => {
 
@@ -106,6 +105,15 @@ const CreateGraph = () => {
     layer.draw();
   }
 
+  const clearEdges = () => {
+    var layer = layerRef.current;
+    layer.find('Arrow').destroy();
+    api.clearEdges("clearEdges");
+    setConnectors([]);
+    layer.draw();
+  }
+
+
   const onMouseOverButton = (e, color) => {
     var stage = stageRef.current;
     stage.container().style.cursor = 'pointer';
@@ -128,9 +136,6 @@ const CreateGraph = () => {
     layer.draw();
   }
 
-
-
-
   return (
     <div>
       <Stage width={window.innerWidth} height={window.innerHeight} ref={stageRef}>
@@ -142,64 +147,25 @@ const CreateGraph = () => {
           <NodePanel />
 
           {/* Clear Canvas Button*/}
-          <ClearCanvasButton
-            id="clear-canvas-Label"
+          <CanvasButton
             x={65}
             y={50}
+            value="Clear Canvas"
             onClick={clearCanvas}
             onMouseOver={ (e) => onMouseOverButton(e,'red')}
             onMouseOut={(e) => onMouseOutButton(e, 'yellow')}
           />
 
           {/* Clear Edges Button*/}
-          <Label
+          <CanvasButton
+            id="clear-canvas-Label"
             x={70}
             y={95}
-            onClick={(e) => {
-              var layer = layerRef.current;
-              layer.find('Arrow').destroy();
-              api.clearEdges("clearEdges");
-              setConnectors([]);
-              layer.draw();
-            }}
-            onMouseOver={(e) => {
-              var stage = stageRef.current;
-              stage.container().style.cursor = 'pointer';
-              var layer = layerRef.current;
-              var tag = e.currentTarget.getChildren(function(node){
-                return node.getClassName() === 'Tag';
-              })
-              tag[0].setAttr('fill', 'red');
-              layer.draw();
-            }}
-            onMouseOut={(e) => {
-              var stage = stageRef.current;
-              stage.container().style.cursor = 'default';
-              var layer = layerRef.current;
-              var tag = e.currentTarget.getChildren(function(node){
-                return node.getClassName() === 'Tag';
-              })
-              tag[0].setAttr('fill', 'yellow');
-              layer.draw();
-            }}
-          >
-            <Tag
-              fill={"yellow"}
-              shadowColor={'black'}
-              shadowBlur={10}
-              shadowOffsetX={10}
-              shadowOffsetY={10}
-              shadowOpacity={0.5}
-              cornerRadius={10}
-            />
-            <Text
-              text={"Clear Edges"}
-              fontFamily={"Calibri"}
-              fontSize={18}
-              padding={5}
-              fill={"black"}
-            />
-          </Label>
+            value="Clear Edges"
+            onClick={clearEdges}
+            onMouseOver={ (e) => onMouseOverButton(e,'red')}
+            onMouseOut={(e) => onMouseOutButton(e, 'yellow')}
+          />
 
           {/* GPS Circle*/}
           <Circle

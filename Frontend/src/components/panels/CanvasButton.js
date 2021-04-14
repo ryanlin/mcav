@@ -2,7 +2,7 @@ import React from 'react';
 import { Rect, Text, Stage, Layer, Circle, Arrow, Group, Line, Label, Tag} from 'react-konva';
 
 
-function ClearCanvasButton(props) {
+function CanvasButton(props) {
   return(
     <Label
       x={props.x}
@@ -12,7 +12,6 @@ function ClearCanvasButton(props) {
       onMouseOut={props.onMouseOut}
     >
       <Tag
-        class="clear-canvas-button"
         fill={"yellow"}
         shadowColor={'black'}
         shadowBlur={10}
@@ -22,8 +21,7 @@ function ClearCanvasButton(props) {
         cornerRadius={10}
       />
       <Text
-        class="clear-canvas-button"
-        text={"Clear Canvas"}
+        text={props.value}
         fontFamily={"Calibri"}
         fontSize={18}
         padding={5}
@@ -33,4 +31,4 @@ function ClearCanvasButton(props) {
   );
 }
 
-export default ClearCanvasButton;
+export default CanvasButton;
