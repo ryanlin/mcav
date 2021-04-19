@@ -1,6 +1,6 @@
-export { default as DropDown } from './DropDown';
-export { default as CalibrationPanels } from './CalibrationPanels';
+export { DropDown, selectTopic } from './DropDown';
+export { CalibrationPanels, onClickCalibrate } from './CalibrationPanels';
 export { default as Toolbar } from './Toolbar';
 export { default as NodePanel } from './NodePanel';
-export { default as CanvasButton } from './CanvasButton'
-export { default as NodeTool } from './NodeTool'
+export { CanvasButton, onMouseOverButton, onMouseOutButton, clearCanvas, clearEdges } from './CanvasButton';
+export { NodeTool, addGPSCircle, addLidarCircle, onMouseOverNodeTool, onMouseOutNodeTool} from './NodeTool'

@@ -22,8 +22,11 @@ function DropDown(props) {
   )
 }
 
-export default DropDown;
+function selectTopic(e, setTopic) {
+  setTopic(e.target.value);
+}
 
+export {DropDown, selectTopic};
 
 // Usage:
 // import { UseState } from 'react';
