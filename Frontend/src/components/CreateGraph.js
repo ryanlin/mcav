@@ -2,7 +2,7 @@ import React, { useState, useRef, useForm } from 'react';
 import { render } from 'react-dom';
 import {Rect, Stage, Layer, Text, Circle, Arrow, Group, Line, Label, Tag} from 'react-konva';
 const {api} = window;
-import { Toolbar, NodePanel, CanvasButton, NodeTool, DropDown, CalibrationPanels } from './panels';
+import { Toolbar, NodePanel, CanvasButton, onMouseOverButton, onMouseOutButton, clearCanvas, clearEdges, NodeTool, addGPSCircle, addLidarCircle, onMouseOverNodeTool, onMouseOutNodeTool, DropDown, selectTopic, CalibrationPanels, onClickCalibrate } from './panels';
 
 const INITIAL_STATE = [];
 const circ_radius = 40;
@@ -25,7 +25,7 @@ const CreateGraph = () => {
   var [fromShapeId, setFromShapeId] = React.useState(null);
   var [displayID, setDisplayID] = React.useState("N/A");
 
-  // Handlers
+  /*Handlers*/
   const handleFileUpload = e => {
     setFileState(e.target.files[0]);
     console.log(e.target.files[0].path);
@@ -35,155 +35,19 @@ const CreateGraph = () => {
     console.log(circles);
   }
 
-  const onClickCalibrate = () => {
-
-    var fullGraph = {
-      numberOfNodes: circles.length,
-      numberOfEdges: connectors.length,
-      nodes: circles,
-      edges: connectors
-    };
-
-		api.receive("calibration", (res) => {
-      console.log("calibration recieved");
-
-      mergeCalibrationOutputs(connectors, res);
-
-      connectors.forEach( connector => {
-        var sourceNode, targetNode;
-        circles.forEach( circle => {
-          if( circle.id == connector.sourceNodeID ) {
-            sourceNode = circle;
-          }
-          else if( circle.id == connector.targetNodeID ) {
-            targetNode = circle;
-          }
-        });
-        var position = returnMatrixPosition(sourceNode, targetNode);
-        connector.x = position.x;
-        connector.y = position.y;
-      });
-
-      //CHANGE Matrix Panels//
-	  	console.log(circles);
-      console.log(connectors);
-
-      setCalibrations(connectors);
-
-      setPanelVisible(true);
-		}, []);
-
-    //console.log(fullGraph);
-    api.calibration("calibration", fullGraph);
-    setSaveFile(fullGraph);
+  /*Helper Functions*/
+  // Checks if an edge between two nodes is already created//
+  function checkEdges(fromShapeId, eachCircle, edges) {
+    for(var i = 0; i < edges.length; i++ ){
+      if( (edges[i].sourceNodeID == fromShapeId || edges[i].sourceNodeID == eachCircle.id) &&
+          (edges[i].targetNodeID == fromShapeId || edges[i].targetNodeID == eachCircle.id) ) {
+        console.log(true);
+        return true;
+      }
+    }
+    console.log(false);
+    return false;
   }
-
-  const selectTopic = (e) => {
-    setTopic(e.target.value);
-  }
-
-  const clearCanvas = () => {
-    var layer = layerRef.current;
-
-    // Delete all arrows and circles
-    layer.find('Arrow').destroy();
-    layer.find('.deleteMe').destroy();
-
-    // Set states to empty
-    setConnectors([]);
-    setCircles([]);
-
-    // Clear arrays in preload.js
-    api.clearGraph("clearGraph");
-
-    // Set selected nodes to empty
-    fromShapeId = null;
-    displayID = "N/A";
-
-    // Force rerender
-    layer.draw();
-  }
-
-  const clearEdges = () => {
-    var layer = layerRef.current;
-    layer.find('Arrow').destroy();
-    api.clearEdges("clearEdges");
-    setConnectors([]);
-    layer.draw();
-  }
-
-  const onMouseOverButton = (e, color) => {
-    var stage = stageRef.current;
-    stage.container().style.cursor = 'pointer';
-    var layer = layerRef.current;
-    var tag = e.currentTarget.getChildren(function(node){
-      return node.getClassName() === 'Tag';
-    })
-    tag[0].setAttr('fill', color);
-    layer.draw();
-  }
-
-  const onMouseOutButton = (e, color) => {
-    var stage = stageRef.current;
-    stage.container().style.cursor = 'default';
-    var layer = layerRef.current;
-    var tag = e.currentTarget.getChildren(function(node){
-      return node.getClassName() === 'Tag';
-    })
-    tag[0].setAttr('fill', color);
-    layer.draw();
-  }
-
-  const addGPSCircle = (e) => {
-    const newCircle = {
-      name: "deleteMe",
-      x: e.target.x(),
-      y: e.target.y(),
-      id: circles.length,
-      sensorType: "gps",
-      type: "pose",
-      topic: "null"
-    }; // New circle properties : dictionary
-
-    // Add circle to circles hook
-    setCircles(circles.concat([newCircle]));
-
-    // Reset node Tool position
-    var layer = layerRef.current;
-    var draggableCircle = layer.findOne(".draggableCircle");
-    draggableCircle.position({ x: 140, y: 180 });
-  }
-
-  const addLidarCircle = (e) => {
-    const newCircle = {
-      name: "deleteMe",
-      x: e.target.x(),
-      y: e.target.y(),
-      id: circles.length,
-      sensorType: "lidar",
-      type: "pose",
-      topic: "null"
-    }; // New circle properties : dictionary
-
-    // Add circle to circles hook
-    setCircles(circles.concat([newCircle]));
-
-    // Reset node Tool position
-    var layer = layerRef.current;
-    var draggableCircle = layer.findOne(".draggableCircle2");
-    draggableCircle.position({ x: 140, y: 285 });
-  }
-
-  const onMouseOverNodeTool = () => {
-    var stage = stageRef.current;
-    stage.container().style.cursor = 'move';
-  }
-
-  const onMouseOutNodeTool = () => {
-    var stage = stageRef.current;
-    stage.container().style.cursor = 'default';
-  }
-
 
   return (
     <div>
@@ -202,9 +66,9 @@ const CreateGraph = () => {
             x={65}
             y={50}
             value="Clear Canvas"
-            onClick={clearCanvas}
-            onMouseOver={ (e) => onMouseOverButton(e,'red')}
-            onMouseOut={(e) => onMouseOutButton(e, 'yellow')}
+            onClick={(e) => clearCanvas(e, setCircles, setConnectors, fromShapeId, displayID, layerRef)}
+            onMouseOver={ (e) => onMouseOverButton(e,'red', stageRef, layerRef)}
+            onMouseOut={(e) => onMouseOutButton(e, 'yellow', stageRef, layerRef)}
           />
 
           {/* Clear Edges Button*/}
@@ -213,9 +77,9 @@ const CreateGraph = () => {
             x={70}
             y={95}
             value="Clear Edges"
-            onClick={clearEdges}
-            onMouseOver={ (e) => onMouseOverButton(e,'red')}
-            onMouseOut={(e) => onMouseOutButton(e, 'yellow')}
+            onClick={ (e) => clearEdges(e, setConnectors, layerRef)}
+            onMouseOver={ (e) => onMouseOverButton(e,'red', stageRef, layerRef)}
+            onMouseOut={(e) => onMouseOutButton(e, 'yellow', stageRef, layerRef)}
           />
 
           {/* GPS Circle*/}
@@ -227,9 +91,9 @@ const CreateGraph = () => {
             fill="green"
             stroke="blue"
             draggable
-            onDragEnd={addGPSCircle}
-            onMouseOver={onMouseOverNodeTool}
-            onMouseOut={onMouseOutNodeTool}
+            onDragEnd={(e) => addGPSCircle(e, circles, setCircles, layerRef)}
+            onMouseOver={(e) => onMouseOverNodeTool(e, stageRef)}
+            onMouseOut={(e) => onMouseOutNodeTool(e, stageRef)}
           />
 
           {/* Lidar Circle*/}
@@ -241,9 +105,9 @@ const CreateGraph = () => {
             fill="green"
             stroke="red"
             draggable
-            onDragEnd={addLidarCircle}
-            onMouseOver={onMouseOverNodeTool}
-            onMouseOut={onMouseOutNodeTool}
+            onDragEnd={(e) => addLidarCircle(e, circles, setCircles, layerRef)}
+            onMouseOver={(e) => onMouseOverNodeTool(e, stageRef)}
+            onMouseOut={(e) => onMouseOutNodeTool(e, stageRef)}
           />
 
           {/* Render Calibration Panels*/}
@@ -388,12 +252,12 @@ const CreateGraph = () => {
       <DropDown
         id="topicSelect"
         options={bagTopics}
-        onChange={selectTopic}
+        onChange={(e) => selectTopic(e, setTopic)}
         instruction="Choose a Topic"
       />
 
       <button
-        onClick={onClickCalibrate}
+        onClick={(e) => onClickCalibrate(circles, connectors, setCalibrations, setPanelVisible, setSaveFile)}
         style={{
           backgroundColor: "green",
           fontSize: "16px",
@@ -429,73 +293,5 @@ const CreateGraph = () => {
     </div>
   );
 };
-
-function mergeCalibrationOutputs(edgeList, calibrationOutput) {
-  edgeList.forEach( edge => {
-    calibrationOutput.forEach( output => {
-      if( output.id == edge.id ) {
-        edge.calibrationSucceeded = output.calibrationSucceeded;
-        edge.matrix = output.matrix;
-        edge.errScore = output.errScore;
-      }
-    });
-  });
-}
-
-function returnMatrixPosition(node1, node2) {
-  var slope = getSlope(node1.x, node1.y, node2.x, node2.y);
-  var midpoint = getMidpoint(node1.x, node1.y, node2.x, node2.y);
-  var position = midpoint;
-  if( slope > 0 ) {
-    position.x -= 40;
-  }
-  else if( slope < 0 ) {
-    position.x += 40;
-  }
-  else {
-    position.y += 40;
-  }
-  return position;
-}
-
-function getMidpoint(x1, y1, x2, y2) {
-  var midpoint = new Object();
-  midpoint.x=(x1+(x2-x1)*0.50);
-  midpoint.y=(y1+(y2-y1)*0.50);
-  return midpoint;
-}
-
-function getSlope(x1, y1, x2, y2) {
-    var slope = (y2 - y1) / (x2 - x1);
-    return slope;
-}
-
-// api.receive("bagfile", (res) => {
-//   console.log("bagfile recieved");
-//   topicList = JSON.parse(JSON.stringify(res));
-//   console.log(topicList);
-
-//   // TAIGA ADD TOPICS TO DROP DOWN MENU //
-
-// }, []);
-
-/*
-api.receive("calibration", (res) => {
-  console.log("calibration recieved");
-  console.log(res);
-}, []);
-*/
-
-function checkEdges(fromShapeId, eachCircle, edges) {
-  for(var i = 0; i < edges.length; i++ ){
-    if( (edges[i].sourceNodeID == fromShapeId || edges[i].sourceNodeID == eachCircle.id) &&
-        (edges[i].targetNodeID == fromShapeId || edges[i].targetNodeID == eachCircle.id) ) {
-      console.log(true);
-      return true;
-    }
-  }
-  console.log(false);
-  return false;
-}
 
 export default CreateGraph;
