@@ -11,7 +11,8 @@ def parse_bag(topic: str, bag_file_path: str) -> Tuple[np.ndarray, np.ndarray, n
     Parse rosbag to obtain timestamp, transforms, and covariances.
     """
     # Parse rosbag
-    df_pose = pd.read_csv(bagreader(bag_file_path).message_by_topic(topic))
+    df_pose = pd.read_csv(
+        bagreader(bag_file_path, verbose=False).message_by_topic(topic))
 
     time_stamp = df_pose["Time"].to_numpy()
     covariance = df_pose["pose.covariance"].tolist()
