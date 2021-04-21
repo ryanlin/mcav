@@ -53,16 +53,18 @@ function onMouseOutButton(e, color, stageRef, layerRef) {
   layer.draw();
 }
 
-function clearCanvas(e, setCircles, setConnectors, fromShapeId, displayID, layerRef) {
+function clearCanvas(e, setCircles, setConnectors, setCalibrations, fromShapeId, displayID, layerRef) {
   var layer = layerRef.current;
 
   // Delete all arrows and circles
   layer.find('Arrow').destroy();
   layer.find('.deleteMe').destroy();
+  layer.find('.CalibrationPanels').destroy();
 
   // Set states to empty
   setConnectors([]);
   setCircles([]);
+  setCalibrations([]);
 
   // Clear arrays in preload.js
   api.clearGraph("clearGraph");

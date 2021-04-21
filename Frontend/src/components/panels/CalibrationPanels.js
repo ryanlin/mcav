@@ -6,6 +6,7 @@ const {api} = window;
 function CalibrationPanels(props) {
   return (
     <Group
+      name="CalibrationPanels"
       draggable
       x={props.x}
       y={props.y}
