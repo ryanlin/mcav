@@ -66,7 +66,7 @@ const CreateGraph = () => {
             x={65}
             y={50}
             value="Clear Canvas"
-            onClick={(e) => clearCanvas(e, setCircles, setConnectors, fromShapeId, displayID, layerRef)}
+            onClick={(e) => clearCanvas(e, setCircles, setConnectors, setCalibrations, fromShapeId, displayID, layerRef)}
             onMouseOver={ (e) => onMouseOverButton(e,'red', stageRef, layerRef)}
             onMouseOut={(e) => onMouseOutButton(e, 'yellow', stageRef, layerRef)}
           />
