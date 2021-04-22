@@ -27,6 +27,7 @@ function DropDown(props) {
 
   return(
     <select
+      key={props.id}
       id={props.id}
       selectedindex={selectedIndex}
       onChange={props.onChange}
@@ -36,9 +37,9 @@ function DropDown(props) {
         left: props.position.left
       }}
     >
-      <option>{props.instruction}</option>
-      {options.map( (option) => (
-        <option>{option}</option>
+      <option key={0}>{props.instruction}</option>
+      {options.map( (option, index) => (
+        <option key={index+1}>{option}</option>
       ))}
     </select>
   )
