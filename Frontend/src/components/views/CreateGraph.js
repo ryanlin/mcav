@@ -83,6 +83,7 @@ const CreateGraph = () => {
             edges={connectors}
             setNodes={setCircles}
             setEdges={setConnectors}
+            setCalibrations={setCalibrations}
           />
 
           <GraphView
