@@ -2,7 +2,9 @@ import React, { useState, useRef, useForm } from 'react';
 import { render } from 'react-dom';
 import {Rect, Stage, Layer, Text, Circle, Arrow, Group, Line, Label, Tag} from 'react-konva';
 const {api} = window;
-import { Toolbar, NodePanel, CanvasButton, onMouseOverButton, onMouseOutButton, clearCanvas, clearEdges, NodeTool, addGPSCircle, addLidarCircle, onMouseOverNodeTool, onMouseOutNodeTool, DropDown, selectTopic, CalibrationPanels, onClickCalibrate } from '../panels';
+import { NodePanel, CanvasButton, onMouseOverButton, onMouseOutButton, clearCanvas, clearEdges, NodeTool, addGPSCircle, addLidarCircle, onMouseOverNodeTool, onMouseOutNodeTool, DropDown, selectTopic, CalibrationPanels, onClickCalibrate } from '../panels';
+
+import { Toolbar } from '../creategraph';
 
 const INITIAL_STATE = [];
 const circ_radius = 40;
@@ -54,60 +56,16 @@ const CreateGraph = () => {
       <Stage width={window.innerWidth} height={window.innerHeight} ref={stageRef}>
         <Layer ref={layerRef}>
           {/*Toolbar*/}
-          <Toolbar />
+          <Toolbar
+            nodes={circles}
+            edges={connectors}
+            setNodes={setCircles}
+            setEdges={setConnectors}
+          />
 
           {/*Panel*/}
           <NodePanel
             displayID={displayID}
-          />
-
-          {/* Clear Canvas Button*/}
-          <CanvasButton
-            x={65}
-            y={50}
-            value="Clear Canvas"
-            onClick={(e) => clearCanvas(e, setCircles, setConnectors, setCalibrations, fromShapeId, displayID, layerRef)}
-            onMouseOver={ (e) => onMouseOverButton(e,'red', stageRef, layerRef)}
-            onMouseOut={(e) => onMouseOutButton(e, 'yellow', stageRef, layerRef)}
-          />
-
-          {/* Clear Edges Button*/}
-          <CanvasButton
-            id="clear-canvas-Label"
-            x={70}
-            y={95}
-            value="Clear Edges"
-            onClick={ (e) => clearEdges(e, setConnectors, layerRef)}
-            onMouseOver={ (e) => onMouseOverButton(e,'red', stageRef, layerRef)}
-            onMouseOut={(e) => onMouseOutButton(e, 'yellow', stageRef, layerRef)}
-          />
-
-          {/* GPS Circle*/}
-          <NodeTool
-            name="draggableCircle"
-            text="GPS"
-            text_pos={ {x:35, y:170} }
-            node_pos={ {x:140, y:180} }
-            fill="green"
-            stroke="blue"
-            draggable
-            onDragEnd={(e) => addGPSCircle(e, circles, setCircles, layerRef)}
-            onMouseOver={(e) => onMouseOverNodeTool(e, stageRef)}
-            onMouseOut={(e) => onMouseOutNodeTool(e, stageRef)}
-          />
-
-          {/* Lidar Circle*/}
-          <NodeTool
-            name="draggableCircle2"
-            text="LIDAR"
-            text_pos={ {x:30, y:275} }
-            node_pos={ {x:140, y:285} }
-            fill="green"
-            stroke="red"
-            draggable
-            onDragEnd={(e) => addLidarCircle(e, circles, setCircles, layerRef)}
-            onMouseOver={(e) => onMouseOverNodeTool(e, stageRef)}
-            onMouseOut={(e) => onMouseOutNodeTool(e, stageRef)}
           />
 
           {/* Render Calibration Panels*/}
@@ -184,7 +142,7 @@ const CreateGraph = () => {
 
                   // Set this circle as selected circle
                   setFromShapeId(eachCircle.id);
-                  setDisplayID(eachCircle.sensorType);
+                  setDisplayID(eachCircle.type);
                 }
               }}
 
