@@ -34,16 +34,16 @@ class Poses:
                     if not np.isclose(covariance[i, i], 0.0, rtol=1e-05, atol=1e-08, equal_nan=False):
                         break
                 else:
-                    covariances.append(np.eye(6))
+                    covariances.append(np.eye(6) * 1e-3)
                     continue
 
                 # Overestimation of rotation covariance of GPS. The car GPS sensor does not provide this.
                 if covariance[3, 3] == 0.0:
-                    covariance[3, 3] = 1.0
+                    covariance[3, 3] = 1e-3
                 if covariance[4, 4] == 0.0:
-                    covariance[4, 4] = 1.0
+                    covariance[4, 4] = 1e-3
                 if covariance[5, 5] == 0.0:
-                    covariance[5, 5] = 1.0
+                    covariance[5, 5] = 1e-3
 
                 covariances.append(covariance)
             covariances = np.stack(covariances)

@@ -8,29 +8,25 @@ from calibration_service import *
 def simple_graph_data():
     return '''
     {
-        "numberOfNodes": 2,
-        "numberOfEdges": 1,
         "nodes": [
             {
-                "id": 0,
+                "key": 0,
                 "type": "pose",
                 "topic": "/gps_pose",
-                "rosbagPath": "input_data/lidar_odom.bag",
-                "possibleTopics": ["/gps_pose", "/odom"]
+                "rosbagPath": "input_data/lidar_odom.bag"
             },
             {
-                "id": 1,
+                "key": 1,
                 "type": "pose",
                 "topic": "/odom",
-                "rosbagPath": "input_data/lidar_odom.bag",
-                "possibleTopics": ["/gps_pose", "/odom"]
+                "rosbagPath": "input_data/lidar_odom.bag"
             }
         ],
         "edges": [
             {
-                "id": 0,
-                "sourceNodeID": 1,
-                "targetNodeID": 0
+                "key": 0,
+                "sourceNodeKey": 1,
+                "targetNodeKey": 0
             }
         ]
     }
@@ -43,32 +39,32 @@ def simple_graph(simple_graph_data):
 
 
 @pytest.fixture
-def ids_poses(simple_graph):
-    return get_ids_poses(simple_graph.nodes)
+def keys_poses(simple_graph):
+    return get_keys_poses(simple_graph.nodes)
 
 
 @pytest.mark.dependency()
-def test_get_ids_poses_length(ids_poses, simple_graph):
-    assert len(ids_poses) == len(simple_graph.nodes) >= 2
+def test_get_keys_poses_length(keys_poses, simple_graph):
+    assert len(keys_poses) == len(simple_graph.nodes) >= 2
 
 
-@pytest.mark.dependency(depends=["test_get_ids_poses_length"])
-def test_get_ids_poses_data_from_bag(ids_poses):
-    for poses in ids_poses.values():
+@pytest.mark.dependency(depends=["test_get_keys_poses_length"])
+def test_get_keys_poses_data_from_bag(keys_poses):
+    for poses in keys_poses.values():
         assert len(poses.timestamps) == \
             len(poses.poses) == \
             len(poses.covariances) != 0
 
 
 @pytest.fixture
-def synced_source_target_poses(ids_poses):
-    return sync_poses(ids_poses[1], ids_poses[0])
+def synced_source_target_poses(keys_poses):
+    return sync_poses(keys_poses[1], keys_poses[0])
 
 
-@pytest.mark.dependency(depends=["test_get_ids_poses_data_from_bag"])
-def test_sync_poses(synced_source_target_poses, ids_poses):
+@pytest.mark.dependency(depends=["test_get_keys_poses_data_from_bag"])
+def test_sync_poses(synced_source_target_poses, keys_poses):
     lidar_poses, gps_poses = synced_source_target_poses
-    assert len(lidar_poses) > len(ids_poses[1])
+    assert len(lidar_poses) > len(keys_poses[1])
     assert len(gps_poses) == len(lidar_poses) != 0
     assert np.allclose(gps_poses.timestamps, lidar_poses.timestamps)
 
@@ -79,7 +75,23 @@ def calibration_result(synced_source_target_poses):
     return calibrate_synced_poses(source_poses_synced, target_poses_synced)
 
 
+@pytest.fixture
+def synced_target_source_poses(keys_poses):
+    return sync_poses(keys_poses[0], keys_poses[1])
+
+
 @pytest.mark.dependency(depends=["test_sync_poses"])
+def test_sync_poses_reverse(synced_target_source_poses, synced_source_target_poses):
+    gps_poses1, lidar_poses1 = synced_target_source_poses
+    lidar_poses2, gps_poses2 = synced_source_target_poses
+    assert len(gps_poses1) == \
+        len(lidar_poses1) == \
+        len(gps_poses2) == \
+        len(lidar_poses2)
+    assert np.allclose(gps_poses2.timestamps, gps_poses1.timestamps)
+
+
+@pytest.mark.dependency(depends=["test_sync_poses_reverse"])
 def test_calibrate_synced_poses_output_structure(calibration_result):
     assert isinstance(calibration_result[0], np.ndarray)
     assert isinstance(calibration_result[1], np.ndarray)
