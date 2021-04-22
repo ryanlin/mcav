@@ -3,15 +3,12 @@ import { Text, Circle } from 'react-konva';
 
 const CIRCLE_RADIUS = 40;
 
-
 function NodeTool(props) {
 
   return (
     <React.Fragment>
       {/* header text */}
       <Text
-        key={props.key}
-        id={props.id}
         x={props.text_pos.x}
         y={props.text_pos.y}
         fontSize={20}
@@ -21,7 +18,7 @@ function NodeTool(props) {
 
       {/* draggable */}
       <Circle
-        key={props.key}
+        key={props.id}
         id={props.id}
         name={props.name}
         original_pos={props.circ_pos}
