@@ -11,7 +11,7 @@ const TEST_TYPES = ["pose", "point-cloud", "image"];
 
 var topicList = [];
 
-const CreateGraph = () => {
+const CreateGraph = (props) => {
   const [calibrations, setCalibrations] = useState(INITIAL_STATE);
   const [bagTopics, setBagTopics] = useState(INITIAL_STATE);
   const [fileState, setFileState] = useState("null");
@@ -84,6 +84,7 @@ const CreateGraph = () => {
             setNodes={setCircles}
             setEdges={setConnectors}
             setCalibrations={setCalibrations}
+            rosbagPath={props.filePath}
           />
 
           <GraphView

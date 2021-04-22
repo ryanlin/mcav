@@ -32,7 +32,7 @@ function Toolbar(props) {
       text: "GPS",
       text_pos: {x:35, y:170},
       circ_pos: {x:140, y:180},
-      onDragEnd: (e) => addNode(e, props.nodes, props.setNodes)
+      onDragEnd: (e) => addNode(e, props.nodes, props.setNodes, props.rosbagPath)
     }
   ];
 
@@ -87,7 +87,7 @@ function Toolbar(props) {
 }
 
 // Adds node to nodes hook
-function addNode(e, nodes, setNodes) {
+function addNode(e, nodes, setNodes, rosbagPath) {
   // New circle properties : dictionary
   const newCircle = {
     key: nodes.length,
@@ -95,7 +95,8 @@ function addNode(e, nodes, setNodes) {
     x: e ? e.target.x() : 50,
     y: e ? e.target.y() : 50,
     type: "null",
-    topic: "null"
+    topic: "null",
+    rosbagPath: rosbagPath
   };
 
   // Add circle to circles hook
