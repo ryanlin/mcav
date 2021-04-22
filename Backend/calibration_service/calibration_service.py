@@ -10,19 +10,19 @@ from poses.utils.lie_groups import SE3
 from calibration import calibrate
 
 
-def get_ids_poses(node_dict: dict):
-    """Map ID to poses from node information
+def get_keys_poses(node_dict: dict):
+    """Map key to poses from node information
 
     @param node_dict Dict[int, NodeInformation]
     """
-    ids_poses = dict()
+    keys_poses = dict()
 
-    for id, node_info in node_dict.items():
+    for key, node_info in node_dict.items():
         node_poses = Poses.from_pose_bag(
             node_info.topic, node_info.rosbag_path)
-        ids_poses[id] = node_poses
+        keys_poses[key] = node_poses
 
-    return ids_poses
+    return keys_poses
 
 
 def sync_poses(poses1: Poses, poses2: Poses) -> Tuple[Poses, Poses]:
@@ -63,26 +63,26 @@ def run_calibration_service(json_message: str):
     """Perform calibration on json message
 
     return a list of dictionary of calibration result:
-        id: edge id
+        key: edge key
         calibrationSucceeded: true if calibration is successful.
         matrix: 4x4 transformation matrix horizontally flattened.
         errScore: the score for the quality of the solution.
     """
     calibration_graph = Graph(json_message)
 
-    ids_poses = get_ids_poses(calibration_graph.nodes)
+    keys_poses = get_keys_poses(calibration_graph.nodes)
 
     edge_calibration_results = []
-    for edge_id, edge in calibration_graph.edges.items():
-        source_poses_synced, target_poses_synced = sync_poses(ids_poses[edge.source_node_id],
-                                                              ids_poses[edge.target_node_id])
+    for edge_key, edge in calibration_graph.edges.items():
+        source_poses_synced, target_poses_synced = sync_poses(keys_poses[edge.source_node_key],
+                                                              keys_poses[edge.target_node_key])
 
         R_star, t_star, statusSuccess, duality_gap = calibrate_synced_poses(
             source_poses_synced, target_poses_synced)
 
         T_star = np.block([[R_star, t_star], [0, 0, 0, 1]])
 
-        edge_calibration_result = {"id": edge_id,
+        edge_calibration_result = {"key": edge_key,
                                    "calibrationSucceeded": statusSuccess,
                                    "matrix": T_star.flatten().tolist(),
                                    "errScore": duality_gap}

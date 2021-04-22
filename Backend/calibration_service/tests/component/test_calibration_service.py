@@ -6,80 +6,72 @@ from calibration_service import *
 
 lidar_gps_graph_expected_result = ('''
 {
-    "numberOfNodes": 2,
-    "numberOfEdges": 1,
     "nodes": [
         {
-            "id": 0,
+            "key": 0,
             "type": "pose",
             "topic": "/gps_pose",
-            "rosbagPath": "input_data/lidar_odom.bag",
-            "possibleTopics": ["/gps_pose", "/odom"]
+            "rosbagPath": "input_data/lidar_odom.bag"
         },
         {
-            "id": 1,
+            "key": 1,
             "type": "pose",
             "topic": "/odom",
-            "rosbagPath": "input_data/lidar_odom.bag",
-            "possibleTopics": ["/gps_pose", "/odom"]
+            "rosbagPath": "input_data/lidar_odom.bag"
         }
     ],
     "edges": [
         {
-            "id": 0,
-            "sourceNodeID": 1,
-            "targetNodeID": 0
+            "key": 0,
+            "sourceNodeKey": 1,
+            "targetNodeKey": 0
         }
     ]
 }
-''', {0: [0.0671, -0.0144,  0.9978, -1.5182,
-          0.9979, -0.0013, -0.0671,  0.2457,
-          0.0022,  0.9999,  0.0143, -1.2289,
-          0.0000,  0.0000,  0.0000,  1.0000]})
+''', {0: [6.60356445e-02, - 1.43634488e-02,  9.97691136e-01, - 1.52978875e+00,
+          9.97792073e-01, - 1.29353312e-03, - 6.60609615e-02,  2.46103209e-01,
+          2.23983526e-03,  9.99896555e-01,  1.42464058e-02, - 1.22915233e+00,
+          0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  1.00000000e+00]})
 
 
 multiple_graph_expected_result = ('''
 {
-    "numberOfNodes": 2,
-    "numberOfEdges": 1,
     "nodes": [
         {
-            "id": 0,
+            "key": 0,
             "type": "pose",
             "topic": "/gps_pose",
-            "rosbagPath": "input_data/lidar_odom.bag",
-            "possibleTopics": ["/gps_pose", "/odom"]
+            "rosbagPath": "input_data/lidar_odom.bag"
         },
         {
-            "id": 1,
+            "key": 1,
             "type": "pose",
             "topic": "/odom",
-            "rosbagPath": "input_data/lidar_odom.bag",
-            "possibleTopics": ["/gps_pose", "/odom"]
+            "rosbagPath": "input_data/lidar_odom.bag"
         }
     ],
     "edges": [
         {
-            "id": 0,
-            "sourceNodeID": 1,
-            "targetNodeID": 0
+            "key": 0,
+            "sourceNodeKey": 1,
+            "targetNodeKey": 0
         },
         {
-            "id": 1,
-            "sourceNodeID": 0,
-            "targetNodeID": 0
+            "key": 1,
+            "sourceNodeKey": 0,
+            "targetNodeKey": 0
         },
         {
-            "id": 2,
-            "sourceNodeID": 1,
-            "targetNodeID": 1
+            "key": 2,
+            "sourceNodeKey": 1,
+            "targetNodeKey": 1
         }
     ]
 }
-''', {0: [0.0671, -0.0144,  0.9978, -1.5182,
-          0.9979, -0.0013, -0.0671,  0.2457,
-          0.0022,  0.9999,  0.0143, -1.2289,
-          0.0000,  0.0000,  0.0000,  1.0000],
+''', {0: [6.60356445e-02, - 1.43634488e-02,  9.97691136e-01, - 1.52978875e+00,
+          9.97792073e-01, - 1.29353312e-03, - 6.60609615e-02,  2.46103209e-01,
+          2.23983526e-03,  9.99896555e-01,  1.42464058e-02, - 1.22915233e+00,
+          0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  1.00000000e+00],
       1: np.eye(4).flatten().tolist(),
       2: np.eye(4).flatten().tolist()})
 
@@ -98,15 +90,16 @@ def test_lidar_gps_calibration_service(graph_data):
     encountered_edge_id = []
     for result in calibration_results:
         # Ensure one output per edge
-        assert result["id"] not in encountered_edge_id
-        encountered_edge_id.append(result["id"])
+        assert result["key"] not in encountered_edge_id
+        encountered_edge_id.append(result["key"])
 
         # Ensure calibration succeeded
         assert result["calibrationSucceeded"]
 
         # Ensure calibration result is reasonable
-        expected_transformation = np.array(graph_data[1][result["id"]])
+        expected_transformation = np.array(graph_data[1][result["key"]])
         calibrated_transformation = np.array(result["matrix"])
+
         assert np.allclose(calibrated_transformation,
                            expected_transformation,
                            atol=1e-3)

@@ -70,7 +70,7 @@ def calibrate(Ta: np.ndarray,
     objective = cp.Maximize(gamma)
     problem = cp.Problem(objective, constraint)
 
-    problem.solve(solver=cp.CVXOPT, abstol=1e-7, max_iters=10000,
+    problem.solve(solver=cp.CVXOPT, reltol=1e-9, abstol=1e-9, feastol=1e-7, max_iters=2000,
                   refinement=100, kktsolver='robust')
 
     # Exit if solution was not found
