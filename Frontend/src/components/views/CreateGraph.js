@@ -60,12 +60,20 @@ const CreateGraph = (props) => {
 
   /*Handlers*/
   const handleFileUpload = e => {
+    // upload files
     setFileState(e.target.files[0]);
-    console.log(e.target.files[0].path);
-    circles.forEach( circle => {
-      circle.rosbagPath = e.target.files[0].path;
-    });
-    console.log(circles);
+
+    // console.log(e.target.files[0].path);
+    // console.log(circles);
+  }
+
+  // Sets property of given node to value sent in event
+  function  setProperty(e, nodes, selectionId, property) {
+    let node = nodes.find( node => (node.id === selectionId) );
+    node[property] = e.target.value;
+    if(property === "topic") {
+      node["rosbagPath"] = fileState.path;
+    }
   }
 
   return (
@@ -225,10 +233,5 @@ const checkDeselect = (e, selectionId, setSelectionId, circles) => {
   }
 };
 
-// Sets property of given node to event value
-function  setProperty(e, nodes, selectionId, property) {
-  let node = nodes.find( node => (node.id === selectionId) );
-  node[property] = e.target.value;
-}
 
 export default CreateGraph;
