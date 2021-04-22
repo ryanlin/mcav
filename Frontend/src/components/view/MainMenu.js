@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileUploadButton } from "./buttons";
+import { FileUploadButton } from "../buttons";
 
 function MainMenuOption(props) {
   
