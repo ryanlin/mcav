@@ -8,22 +8,6 @@ import { Toolbar, NodePanel, DropDown, GraphView } from '../creategraph';
 
 const INITIAL_STATE = [];
 const TEST_TYPES = ["pose", "point-cloud", "image"];
-const TEST_TYPES2 = [
-  {
-    label: "pose",
-    value: "pose"
-  },
-  {
-    label: "point-cloud",
-    value: "point-cloud"
-  },
-  {
-    label: "image",
-    value: "image"
-  }
-];
-
-const circ_radius = 40;
 
 var topicList = [];
 
