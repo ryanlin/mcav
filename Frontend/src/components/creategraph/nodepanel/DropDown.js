@@ -18,7 +18,7 @@ function DropDown(props) {
     // console.log("node_val:",node_val, "option_index: ", option_index);
     // console.log("curr: ", curr_index);
 
-    // Set selected index
+    // Set selected index to show
     setSelectedIndex(curr_index);
     if ( select !== null ) {
       select.selectedIndex = curr_index;        
