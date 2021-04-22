@@ -12,7 +12,7 @@ function Toolbar(props) {
       x: 65,
       y: 50,
       value: "Clear Canvas",
-      onClick: (e) => clearCanvas(e, props.setNodes, props.setEdges)
+      onClick: (e) => clearCanvas(e, props.setNodes, props.setEdges, props.setCalibrations)
     },
     {
       key: 1,
@@ -107,10 +107,11 @@ function addNode(e, nodes, setNodes) {
 }
 
 // Clears Canvas
-function clearCanvas(e, setNodes, setEdges) {
+function clearCanvas(e, setNodes, setEdges, setCalibrations) {
   const empty = [];
   setEdges(empty);
   setNodes(empty);
+  setCalibrations(empty);
 
   // Clear arrays in preload.js
   api.clearGraph("clearGraph");
