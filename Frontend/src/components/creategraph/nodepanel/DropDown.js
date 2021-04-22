@@ -1,13 +1,35 @@
 import React from 'react';
 
+const INIT_IDX = 0; // initial index
+
 function DropDown(props) {
-  const options = props.options;
-  const instruction = props.instruction;
+  const [selectedIndex, setSelectedIndex] = React.useState(INIT_IDX);
+  const options = props.options;  // options in dropdown menu : array
+
+  // When props.selectedId changes, selectedIndex is changed
+  React.useEffect(() => {
+    const select = document.getElementById(props.id); // the select element; 
+    const node = props.nodes.find(n=>(n.id===props.selectedId)); //selected Node
+    const node_val = (node) ? node[props.property] : null;  // e.g node.topic
+    const option_index = options.findIndex(option=>(option === node_val));
+    const curr_index = (option_index >= INIT_IDX) ? option_index+1 : INIT_IDX; 
+
+    // console.log("options: ", options);
+    // console.log("node_val:",node_val, "option_index: ", option_index);
+    // console.log("curr: ", curr_index);
+
+    // Set selected index
+    setSelectedIndex(curr_index);
+    if ( select !== null ) {
+      select.selectedIndex = curr_index;        
+    }
+  }, [props.selectedId]);
 
   return(
     <select
       id={props.id}
-      onChange = {props.onChange}
+      selectedindex={selectedIndex}
+      onChange={props.onChange}
       style={{
         position: 'absolute',
         top: props.position.top,
@@ -23,32 +45,3 @@ function DropDown(props) {
 }
 
 export default DropDown;
-
-// Usage:
-// import { UseState } from 'react';
-//
-// const INITIAL_STATE = []
-// const[bagTopics, setBagTopics] = useState(INITIAL_STATE);
-// const[topic, setTopic] = useState(INITIAL_STATE);
-//
-// // Event Handlers
-// const selectTopic = (e) => {
-//   setTopic(e.target.value);
-// }
-//
-// // API Receivers:
-//
-// api.receive("bagfile", (res) => {
-//   console.log("bagfile recieved");
-//   topicList = JSON.parse(JSON.stringify(res));
-//   console.log(topicList);
-//
-//   setBagTopics(topicList);
-//
-// }, []);
-//
-// <DropDown
-//   id="topicSelect"
-//   options={bagTopics}
-//   onChange={selectTopic}
-// />

@@ -4,10 +4,24 @@ import {Rect, Stage, Layer, Text, Circle, Arrow, Group, Line, Label, Tag} from '
 const {api} = window;
 import { CanvasButton, onMouseOverButton, onMouseOutButton, clearCanvas, clearEdges, NodeTool, addGPSCircle, addLidarCircle, onMouseOverNodeTool, onMouseOutNodeTool, CalibrationPanels, onClickCalibrate } from '../panels';
 
-import { Toolbar, NodePanel, DropDown } from '../creategraph';
+import { Toolbar, NodePanel, DropDown, GraphView } from '../creategraph';
 
 const INITIAL_STATE = [];
 const TEST_TYPES = ["pose", "point-cloud", "image"];
+const TEST_TYPES2 = [
+  {
+    label: "pose",
+    value: "pose"
+  },
+  {
+    label: "point-cloud",
+    value: "point-cloud"
+  },
+  {
+    label: "image",
+    value: "image"
+  }
+];
 
 const circ_radius = 40;
 
@@ -29,7 +43,14 @@ const CreateGraph = () => {
   var [fromShapeId, setFromShapeId] = React.useState(null);
   var [displayID, setDisplayID] = React.useState("N/A");
 
-  console.log("circles: ", circles, "\nconnectors: ", connectors);
+  /* temp debugging log */
+  React.useEffect( () => {
+    console.log("circles: ", circles, "\nconnectors: ", connectors);
+  }, [circles, connectors]);
+
+  React.useEffect( () => {
+    console.log("selected: ", circles[fromShapeId] || null);
+  }, [fromShapeId]);
 
   /* Bandaid List for DropDowns */
   const lists = [
@@ -39,6 +60,7 @@ const CreateGraph = () => {
       options: bagTopics,
       instruction: "Select Topic",
       position: {top:480, left:30},
+      property: "topic",
       onChange: (e) => setProperty(e, circles, fromShapeId, "topic")
     },
     {
@@ -47,22 +69,10 @@ const CreateGraph = () => {
       options: TEST_TYPES,
       instruction: "Select Type",
       position: {top:500, left:30},
+      property: "type",
       onChange: (e) => setProperty(e, circles, fromShapeId, "type")
     }
   ];
-
-  // Checks if an edge between two nodes is already created//
-  function checkEdges(fromShapeId, eachCircle, edges) {
-    for(var i = 0; i < edges.length; i++ ){
-      if( (edges[i].sourceNodeID == fromShapeId || edges[i].sourceNodeID == eachCircle.id) &&
-          (edges[i].targetNodeID == fromShapeId || edges[i].targetNodeID == eachCircle.id) ) {
-        console.log(true);
-        return true;
-      }
-    }
-    console.log(false);
-    return false;
-  }
 
   /*Handlers*/
   const handleFileUpload = e => {
@@ -76,7 +86,12 @@ const CreateGraph = () => {
 
   return (
     <div>
-      <Stage width={window.innerWidth} height={window.innerHeight} ref={stageRef}>
+      <Stage
+        width={window.innerWidth}
+        height={window.innerHeight}
+        ref={stageRef}
+        onMouseDown={(e) => checkDeselect(e, fromShapeId, setFromShapeId, circles)}
+      >
         <Layer ref={layerRef}>
           {/*Toolbar*/}
           <Toolbar
@@ -84,6 +99,14 @@ const CreateGraph = () => {
             edges={connectors}
             setNodes={setCircles}
             setEdges={setConnectors}
+          />
+
+          <GraphView
+            nodes={circles}
+            edges={connectors}
+            selectedNodeId={fromShapeId}
+            setEdges={setConnectors}
+            setSelectedNodeId={setFromShapeId}
           />
 
           {/*Panel*/}
@@ -120,84 +143,6 @@ const CreateGraph = () => {
             //}
           })}
 
-          {/* Render Circles*/}
-          {circles.map((eachCircle, index) => (
-            <Circle
-              key={index}
-              name={eachCircle.name}
-              x={eachCircle.x}
-              y={eachCircle.y}
-              id={eachCircle.id}
-              radius={circ_radius}
-              fill={fromShapeId === eachCircle.id ? "red" : "green"}
-              sensorType={eachCircle.sensorType}
-              topic={eachCircle.topic}
-              type={eachCircle.type}
-              stroke={eachCircle.sensorType === "gps" ? "blue" : "red"}
-
-              onClick={() => {
-                // If no selected circle, select this circle
-                // If selected circle is this circle, deselect
-                // Otherwise make edge with selected circle
-                if(fromShapeId != null) {
-                  // If already selected circle is the circle just clicked, deselect
-                  if(fromShapeId == eachCircle.id) {
-                    setFromShapeId(null);
-                    setDisplayID("N/A");
-                    //eachCircle.topic = topic;
-                    document.getElementById("topicSelect").selectedIndex = 0;
-                  } // If already selected circle is another circle, make edge
-                  else if( !checkEdges(fromShapeId, eachCircle, connectors) ) {
-                    const newConnector = {
-                      key: index,
-                      id: connectors.length,
-                      sourceNodeID: fromShapeId,
-                      targetNodeID: eachCircle.id
-                    };
-                    setConnectors(connectors.concat([newConnector]));
-                    setFromShapeId(null);
-                  }
-                } else { // If no circle is already selected
-                  setTopic(eachCircle.topic);
-                  var a = document.getElementById("topicSelect"); // Topics DropDown Menu
-                  for(var i = 0; i < a.options.length; i++) {
-                    if(a.options[i].label == eachCircle.topic) {
-                      a.selectedIndex = i;
-                    }
-                  }
-
-                  // Set this circle as selected circle
-                  setFromShapeId(eachCircle.id);
-                  setDisplayID(eachCircle.type);
-                }
-              }}
-
-              onMouseOver={() => {
-                var stage = stageRef.current;
-                stage.container().style.cursor = 'pointer';
-              }}
-
-              onMouseOut={() => {
-                var stage = stageRef.current;
-                stage.container().style.cursor = 'default';
-              }}
-            />
-          ))}
-
-          {/* Render Edges*/}
-          {connectors.map((con, index) => {
-            const sourceNodeID = circles.find(s => s.id === con.sourceNodeID);
-            const targetNodeID = circles.find(s => s.id === con.targetNodeID);
-
-            return (
-              <Arrow
-                key={index}
-                id={index}
-                points={[sourceNodeID.x, sourceNodeID.y, targetNodeID.x, targetNodeID.y]}
-                stroke="black"
-              />
-            );
-          })}
         </Layer>
       </Stage>
 
@@ -236,14 +181,16 @@ const CreateGraph = () => {
 
       {/* NodePanel Dropdowns */}
       {lists.map( (list, index) => (
-
         <DropDown
           key={index}
           id={list.id}
           options={list.options}
           position={list.position}
           instruction={list.instruction}
+          property={list.property}
           onChange={list.onChange}
+          selectedId={fromShapeId}
+          nodes={circles}
         />
       ))}
 
@@ -285,9 +232,16 @@ const CreateGraph = () => {
   );
 };
 
+// If clicked on empty area on stage, deselect
+const checkDeselect = (e, selectionId, setSelectionId, circles) => {
+  if (e.target === e.target.getStage()) {
+    setSelectionId(null);
+  }
+};
+
 // Sets property of given node to event value
-function  setProperty(e, nodes, fromShapeId, property) {
-  let node = nodes.find( node => (node.id === fromShapeId) );
+function  setProperty(e, nodes, selectionId, property) {
+  let node = nodes.find( node => (node.id === selectionId) );
   node[property] = e.target.value;
 }
 

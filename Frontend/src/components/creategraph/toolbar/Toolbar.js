@@ -94,7 +94,7 @@ function addNode(e, nodes, setNodes) {
     id: nodes.length,
     x: e ? e.target.x() : 50,
     y: e ? e.target.y() : 50,
-    type: "pose", // TODO: switch to null, use dropdown to set
+    type: "null",
     topic: "null"
   };
 
