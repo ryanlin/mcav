@@ -27,6 +27,7 @@ const CreateGraph = () => {
   var [fromShapeId, setFromShapeId] = React.useState(null);
   var [displayID, setDisplayID] = React.useState("N/A");
 
+  console.log(connectors, circles);
   /*Handlers*/
   const handleFileUpload = e => {
     setFileState(e.target.files[0]);
@@ -69,7 +70,7 @@ const CreateGraph = () => {
           />
 
           {/* Render Calibration Panels*/}
-          {calibrations.map((edge) => {
+          {calibrations.map((edge, index) => {
 
             var newMatrix = [];
             var stringMatrix = [];
@@ -87,6 +88,7 @@ const CreateGraph = () => {
             //if(edge.matrix != null) {
             //var newMatrix = edge.matrix ? edge.matrix : [];
               <CalibrationPanels
+                key={index}
                 x={edge.x}
                 y={edge.y}
                 matrix={stringMatrix}
@@ -97,8 +99,9 @@ const CreateGraph = () => {
           })}
 
           {/* Render Circles*/}
-          {circles.map((eachCircle) => (
+          {circles.map((eachCircle, index) => (
             <Circle
+              key={index}
               name={eachCircle.name}
               x={eachCircle.x}
               y={eachCircle.y}
@@ -124,6 +127,7 @@ const CreateGraph = () => {
                   } // If already selected circle is another circle, make edge
                   else if( !checkEdges(fromShapeId, eachCircle, connectors) ) {
                     const newConnector = {
+                      key: index,
                       id: connectors.length,
                       sourceNodeID: fromShapeId,
                       targetNodeID: eachCircle.id
@@ -159,13 +163,14 @@ const CreateGraph = () => {
           ))}
 
           {/* Render Edges*/}
-          {connectors.map(con => {
+          {connectors.map((con, index) => {
             const sourceNodeID = circles.find(s => s.id === con.sourceNodeID);
             const targetNodeID = circles.find(s => s.id === con.targetNodeID);
 
             return (
               <Arrow
-                key={con.id}
+                key={index}
+                id={index}
                 points={[sourceNodeID.x, sourceNodeID.y, targetNodeID.x, targetNodeID.y]}
                 stroke="black"
               />

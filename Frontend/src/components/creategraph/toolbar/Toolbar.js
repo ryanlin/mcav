@@ -23,11 +23,11 @@ function Toolbar(props) {
       onClick: (e) => clearEdges(e, props.setEdges)
     }
   ];
-  
+
   const node_tools = [
     {
       key: 0,
-      id: "node-tool",
+      id: "node_tool",
       name: "draggableCircle",
       text: "GPS",
       text_pos: {x:35, y:170},
@@ -71,10 +71,10 @@ function Toolbar(props) {
 
 
       {/* NodeTools */}
-      {node_tools.map( (node) => (
+      {node_tools.map( (node, index) => (
         <NodeTool
-          key={node.key}
-          id={node.id}
+          key={index}
+          id={index}
           name={node.name}
           text={node.text}
           text_pos={node.text_pos}
@@ -82,7 +82,7 @@ function Toolbar(props) {
           onDragEnd={node.onDragEnd}
         />
       ))}
-    </React.Fragment>    
+    </React.Fragment>
   )
 }
 
@@ -91,12 +91,12 @@ function addNode(e, nodes, setNodes) {
   // New circle properties : dictionary
   const newCircle = {
     key: nodes.length,
-    id: "node" + nodes.length,
+    id: nodes.length,
     x: e ? e.target.x() : 50,
     y: e ? e.target.y() : 50,
     type: "pose", // TODO: switch to null, use dropdown to set
     topic: "null"
-  }; 
+  };
 
   // Add circle to circles hook
   setNodes(nodes.concat([newCircle]));
@@ -113,8 +113,8 @@ function clearCanvas(e, setNodes, setEdges) {
   setNodes(empty);
 
   // Clear arrays in preload.js
-  //api.clearGraph("clearGraph");
-  
+  api.clearGraph("clearGraph");
+
   // Force draw/render scene
   e.target.getLayer().draw();
 }
@@ -126,7 +126,7 @@ function clearEdges(e, setEdges) {
 
   // Delete edge arrays in preload.js
   //api.clearEdges("clearEdges");
-  
+
   // Force draw/render scene
   e.target.getLayer().draw();
 }
