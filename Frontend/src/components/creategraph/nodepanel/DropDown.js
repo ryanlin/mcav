@@ -10,8 +10,8 @@ function DropDown(props) {
       onChange = {props.onChange}
       style={{
         position: 'absolute',
-        top: 480,
-        left: 30
+        top: props.position.top,
+        left: props.position.left
       }}
     >
       <option>{props.instruction}</option>
@@ -22,11 +22,7 @@ function DropDown(props) {
   )
 }
 
-function selectTopic(e, setTopic) {
-  setTopic(e.target.value);
-}
-
-export {DropDown, selectTopic};
+export default DropDown;
 
 // Usage:
 // import { UseState } from 'react';

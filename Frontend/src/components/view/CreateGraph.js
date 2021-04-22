@@ -2,11 +2,13 @@ import React, { useState, useRef, useForm } from 'react';
 import { render } from 'react-dom';
 import {Rect, Stage, Layer, Text, Circle, Arrow, Group, Line, Label, Tag} from 'react-konva';
 const {api} = window;
-import { NodePanel, CanvasButton, onMouseOverButton, onMouseOutButton, clearCanvas, clearEdges, NodeTool, addGPSCircle, addLidarCircle, onMouseOverNodeTool, onMouseOutNodeTool, DropDown, selectTopic, CalibrationPanels, onClickCalibrate } from '../panels';
+import { CanvasButton, onMouseOverButton, onMouseOutButton, clearCanvas, clearEdges, NodeTool, addGPSCircle, addLidarCircle, onMouseOverNodeTool, onMouseOutNodeTool, CalibrationPanels, onClickCalibrate } from '../panels';
 
-import { Toolbar } from '../creategraph';
+import { Toolbar, NodePanel, DropDown } from '../creategraph';
 
 const INITIAL_STATE = [];
+const TEST_TYPES = ["pose", "point-cloud", "image"];
+
 const circ_radius = 40;
 
 var topicList = [];
@@ -27,18 +29,28 @@ const CreateGraph = () => {
   var [fromShapeId, setFromShapeId] = React.useState(null);
   var [displayID, setDisplayID] = React.useState("N/A");
 
-  console.log(connectors, circles);
-  /*Handlers*/
-  const handleFileUpload = e => {
-    setFileState(e.target.files[0]);
-    console.log(e.target.files[0].path);
-    circles.forEach( circle => {
-      circle.rosbagPath = e.target.files[0].path;
-    });
-    console.log(circles);
-  }
+  console.log("circles: ", circles, "\nconnectors: ", connectors);
 
-  /*Helper Functions*/
+  /* Bandaid List for DropDowns */
+  const lists = [
+    {
+      key: 0,
+      id: "topicSelect",
+      options: bagTopics,
+      instruction: "Select Topic",
+      position: {top:480, left:30},
+      onChange: (e) => setProperty(e, circles, fromShapeId, "topic")
+    },
+    {
+      key: 0,
+      id: "typeSelect",
+      options: TEST_TYPES,
+      instruction: "Select Type",
+      position: {top:500, left:30},
+      onChange: (e) => setProperty(e, circles, fromShapeId, "type")
+    }
+  ];
+
   // Checks if an edge between two nodes is already created//
   function checkEdges(fromShapeId, eachCircle, edges) {
     for(var i = 0; i < edges.length; i++ ){
@@ -50,6 +62,16 @@ const CreateGraph = () => {
     }
     console.log(false);
     return false;
+  }
+
+  /*Handlers*/
+  const handleFileUpload = e => {
+    setFileState(e.target.files[0]);
+    console.log(e.target.files[0].path);
+    circles.forEach( circle => {
+      circle.rosbagPath = e.target.files[0].path;
+    });
+    console.log(circles);
   }
 
   return (
@@ -122,7 +144,7 @@ const CreateGraph = () => {
                   if(fromShapeId == eachCircle.id) {
                     setFromShapeId(null);
                     setDisplayID("N/A");
-                    eachCircle.topic = topic;
+                    //eachCircle.topic = topic;
                     document.getElementById("topicSelect").selectedIndex = 0;
                   } // If already selected circle is another circle, make edge
                   else if( !checkEdges(fromShapeId, eachCircle, connectors) ) {
@@ -212,12 +234,18 @@ const CreateGraph = () => {
         Import bag file
       </button>
 
-      <DropDown
-        id="topicSelect"
-        options={bagTopics}
-        onChange={(e) => selectTopic(e, setTopic)}
-        instruction="Choose a Topic"
-      />
+      {/* NodePanel Dropdowns */}
+      {lists.map( (list, index) => (
+
+        <DropDown
+          key={index}
+          id={list.id}
+          options={list.options}
+          position={list.position}
+          instruction={list.instruction}
+          onChange={list.onChange}
+        />
+      ))}
 
       <button
         onClick={(e) => onClickCalibrate(circles, connectors, setCalibrations, setPanelVisible, setSaveFile)}
@@ -256,5 +284,11 @@ const CreateGraph = () => {
     </div>
   );
 };
+
+// Sets property of given node to event value
+function  setProperty(e, nodes, fromShapeId, property) {
+  let node = nodes.find( node => (node.id === fromShapeId) );
+  node[property] = e.target.value;
+}
 
 export default CreateGraph;
