@@ -2,7 +2,7 @@ import React, { useState, useRef, useForm } from 'react';
 import { render } from 'react-dom';
 import {Rect, Stage, Layer, Text, Circle, Arrow, Group, Line, Label, Tag} from 'react-konva';
 const {api} = window;
-import { Toolbar, NodePanel, CanvasButton, onMouseOverButton, onMouseOutButton, clearCanvas, clearEdges, NodeTool, addGPSCircle, addLidarCircle, onMouseOverNodeTool, onMouseOutNodeTool, DropDown, selectTopic, CalibrationPanels, onClickCalibrate } from './panels';
+import { Toolbar, NodePanel, CanvasButton, onMouseOverButton, onMouseOutButton, clearCanvas, clearEdges, NodeTool, addGPSCircle, addLidarCircle, onMouseOverNodeTool, onMouseOutNodeTool, DropDown, selectTopic, CalibrationPanels, onClickCalibrate } from '../panels';
 
 const INITIAL_STATE = [];
 const circ_radius = 40;
