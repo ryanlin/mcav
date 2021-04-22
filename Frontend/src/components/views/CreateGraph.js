@@ -43,7 +43,7 @@ const CreateGraph = (props) => {
       id: "topicSelect",
       options: bagTopics,
       instruction: "Select Topic",
-      position: {top:480, left:30},
+      position: {top:567, left:30},
       property: "topic",
       onChange: (e) => setProperty(e, circles, fromShapeId, "topic")
     },
@@ -52,7 +52,7 @@ const CreateGraph = (props) => {
       id: "typeSelect",
       options: TEST_TYPES,
       instruction: "Select Type",
-      position: {top:500, left:30},
+      position: {top:587, left:30},
       property: "type",
       onChange: (e) => setProperty(e, circles, fromShapeId, "type")
     }
@@ -145,7 +145,7 @@ const CreateGraph = (props) => {
         type={"file"}
         style={{
           position: 'absolute',
-          top: 433,
+          top: 520,
           left: 30
         }}
         onChange={handleFileUpload}
@@ -166,7 +166,7 @@ const CreateGraph = (props) => {
         }}
         style={{
           position: 'absolute',
-          top: 456,
+          top: 543,
           left: 30
         }}
       >
@@ -197,7 +197,7 @@ const CreateGraph = (props) => {
           borderRadius: "12px",
           color: "white",
           position: 'absolute',
-          top: 530,
+          top: 617,
           left: 63
         }}
         >
@@ -216,7 +216,7 @@ const CreateGraph = (props) => {
         }}
         style={{
           position: 'absolute',
-          top: 590,
+          top: 677,
           left: 79
         }}
         >
