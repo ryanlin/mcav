@@ -138,13 +138,24 @@ const CreateGraph = (props) => {
               setSpinnerVisible(false);
             }
             var newMatrix = [];
-            var stringMatrix = [];
+            var stringPanel = "  ";
             if( edge.matrix != null ) {
               newMatrix = edge.matrix;
               for( var i = 1; i <= newMatrix.length; i++ ) {
-                  stringMatrix.push((Math.floor(newMatrix[i-1] * 1000) / 1000).toString());
+
+                  var floatStr = ((Math.round(newMatrix[i-1] * 1000.0) / 1000.0).toFixed(3)).toString();
+                  if(!floatStr.includes("-"))
+                  {
+                    floatStr = " " + floatStr;
+                  }
+                  stringPanel += floatStr;
+
                   if( i % 4 == 0 ) {
-                    stringMatrix[i-1] += "\n";
+                    stringPanel += ",\n  ";
+                  }
+                  else if( i != newMatrix.length )
+                  {
+                    stringPanel += ", ";
                   }
               }
             }
@@ -156,7 +167,7 @@ const CreateGraph = (props) => {
                 key={index}
                 x={edge.x}
                 y={edge.y}
-                matrix={stringMatrix}
+                matrix={stringPanel}
                 //visible={panelVisible}
               />
             );
