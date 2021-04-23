@@ -67,6 +67,15 @@ const CreateGraph = (props) => {
     }
   ];
 
+  // Sets property of given node to value sent in event
+  function  setProperty(e, nodes, selectionId, property) {
+    let node = nodes.find( node => (node.id === selectionId) );
+    node[property] = e.target.value;
+    if(property === "topic") {
+      node["rosbagPath"] = fileState.path;
+    }
+  }
+
   /*Handlers*/
   const handleFileUpload = e => {
     // upload files
@@ -76,14 +85,14 @@ const CreateGraph = (props) => {
     // console.log(circles);
   }
 
-  // Sets property of given node to value sent in event
-  function  setProperty(e, nodes, selectionId, property) {
-    let node = nodes.find( node => (node.id === selectionId) );
-    node[property] = e.target.value;
-    if(property === "topic") {
-      node["rosbagPath"] = fileState.path;
-    }
-  }
+  /* Sets graph from file */
+  api.receive("load_graph", (res) => {
+    console.log("graph file recieved");
+    console.log(res);
+    setCircles(res.nodes);
+    setConnectors(res.edges);
+    //var graph_loaded = JSON.parse(res);
+  }, []);
 
   return (
     <div>
@@ -268,12 +277,6 @@ const CreateGraph = (props) => {
     </div>
   );
 };
-
-api.receive("load_graph", (res) => {
-  console.log("graph file recieved");
-  console.log(res);
-  //var graph_loaded = JSON.parse(res);
-}, []);
 
 // If clicked on empty area on stage, deselect
 const checkDeselect = (e, selectionId, setSelectionId, circles) => {
