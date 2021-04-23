@@ -10,8 +10,8 @@ function VisualEdge(props) {
   const nodes = props.nodes;
   const edge = props.edge;
   
-  const sourceNode = nodes.find(s => s.id === edge.sourceNodeID);
-  const targetNode = nodes.find(s => s.id === edge.targetNodeID);
+  const sourceNode = nodes.find(s => s.id === edge.sourceNodeKey);
+  const targetNode = nodes.find(s => s.id === edge.targetNodeKey);
 
   return (
     <React.Fragment>

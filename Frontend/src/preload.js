@@ -143,24 +143,24 @@ function calibration(inputGraph) {
 				throw err;
 			}
 			else {
-				var calResult = JSON.parse(results[2]);
+				var calResult = JSON.parse(results[0]);
 
 				ipcRenderer.send("calibration", calResult);
 
 				//Gets list of returned matrices//
-				var matrixResults = [];
-				for( var i = 2; i < results.length; i++ ) {
-				  matrixResults.push( results[i] );
-				}
+				// var matrixResults = [];
+				// for( var i = 2; i < results.length; i++ ) {
+				//   matrixResults.push( results[i] );
+				// }
 
-				matrixResults[0] = matrixResults[0].replaceAll("\'", "\"");
-				matrixResults[0] = matrixResults[0].replaceAll("True", "true");
-				matrixResults[0] = matrixResults[0].replaceAll("False", "false");
+				// matrixResults[0] = matrixResults[0].replaceAll("\'", "\"");
+				// matrixResults[0] = matrixResults[0].replaceAll("True", "true");
+				// matrixResults[0] = matrixResults[0].replaceAll("False", "false");
 
-				var matr = matrixResults[0];
+				// var matr = matrixResults[0];
 
-				backendGraph = JSON.parse(matr);
-       			//createFullGraph();
+				// backendGraph = JSON.parse(matr);
+       	//createFullGraph();
 			}
 		});
 	}

@@ -59,10 +59,10 @@ function enableCalibrationListener(circles, connectors, setCalibrations, setPane
     connectors.forEach( connector => {
       var sourceNode, targetNode;
       circles.forEach( circle => {
-        if( circle.id == connector.sourceNodeID ) {
+        if( circle.key == connector.sourceNodeKey ) {
           sourceNode = circle;
         }
-        else if( circle.id == connector.targetNodeID ) {
+        else if( circle.key == connector.targetNodeKey ) {
           targetNode = circle;
         }
       });
@@ -85,7 +85,7 @@ function enableCalibrationListener(circles, connectors, setCalibrations, setPane
 function mergeCalibrationOutputs(edgeList, calibrationOutput) {
   edgeList.forEach( edge => {
     calibrationOutput.forEach( output => {
-      if( output.id == edge.id ) {
+      if( output.key == edge.key ) {
         edge.calibrationSucceeded = output.calibrationSucceeded;
         edge.matrix = output.matrix;
         edge.errScore = output.errScore;

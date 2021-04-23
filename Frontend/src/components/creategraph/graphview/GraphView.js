@@ -45,8 +45,8 @@ function determineSelection(e, selectionId, setSelectionId, edges, setEdges, cli
       const newEdge = {
         key: edges.length,
         id: "edge" + edges.length,
-        sourceNodeID: selectionId,
-        targetNodeID: clickedId
+        sourceNodeKey: selectionId,
+        targetNodeKey: clickedId
       };
       setEdges(edges.concat([newEdge]));
       setSelectionId(null);
@@ -65,8 +65,8 @@ function determineSelection(e, selectionId, setSelectionId, edges, setEdges, cli
 // Checks if an edge between two nodes already exists
 function checkEdges(sourceId, targetId, edges) {
   const duplicate = edges.find( s => (
-    ( (s.sourceNodeID === sourceId) || (s.sourceNodeID === targetId) ) &&
-    ( (s.targetNodeID === sourceId) || (s.targetNodeID === targetId) )
+    ( (s.sourceNodeKey === sourceId) || (s.sourceNodeKey === targetId) ) &&
+    ( (s.targetNodeKey === sourceId) || (s.targetNodeKey === targetId) )
   ))
 
   if (duplicate) {
