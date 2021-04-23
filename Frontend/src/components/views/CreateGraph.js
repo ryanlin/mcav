@@ -269,6 +269,12 @@ const CreateGraph = (props) => {
   );
 };
 
+api.receive("load_graph", (res) => {
+  console.log("graph file recieved");
+  console.log(res);
+  //var graph_loaded = JSON.parse(res);
+}, []);
+
 // If clicked on empty area on stage, deselect
 const checkDeselect = (e, selectionId, setSelectionId, circles) => {
   if (e.target === e.target.getStage()) {
