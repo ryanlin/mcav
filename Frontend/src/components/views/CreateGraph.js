@@ -45,6 +45,10 @@ const CreateGraph = (props) => {
     console.log("selected: ", circles[fromShapeId] || null);
   }, [fromShapeId]);
 
+  React.useEffect( () => {
+    console.log("calibrations: ", calibrations || null);
+  }, [calibrations]);
+
   /* Bandaid List for DropDowns */
   const lists = [
     {
@@ -85,12 +89,13 @@ const CreateGraph = (props) => {
     // console.log(circles);
   }
 
-  /* Sets graph from file */
+  /* Sets graph from file, rlly bad, rushed for video, redo*/
   api.receive("load_graph", (res) => {
     console.log("graph file recieved");
     console.log(res);
     setCircles(res.nodes);
     setConnectors(res.edges);
+    setCalibrations(res.edges);
     //var graph_loaded = JSON.parse(res);
   }, []);
 
@@ -152,7 +157,7 @@ const CreateGraph = (props) => {
                 x={edge.x}
                 y={edge.y}
                 matrix={stringMatrix}
-                visible={panelVisible}
+                //visible={panelVisible}
               />
             );
             //}
