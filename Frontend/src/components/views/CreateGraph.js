@@ -97,6 +97,24 @@ const CreateGraph = (props) => {
     setConnectors(res.edges);
     setCalibrations(res.edges);
     //var graph_loaded = JSON.parse(res);
+
+    // Get topics
+    const bagPath = res.nodes[0].rosbagPath;
+    setFileState({
+      path: bagPath
+    })
+    console.log(bagPath);
+    api.rosbag("rosbag", bagPath);
+    api.receive("bagfile", (res) => {
+      console.log("bagfile recieved");
+      topicList = JSON.parse(JSON.stringify(res));
+      console.log(topicList);
+
+      setBagTopics(topicList);
+
+      // bandaid spinner stuff
+      setImportSpinnerVisible(false);
+    }, []);
   }, []);
 
   return (
