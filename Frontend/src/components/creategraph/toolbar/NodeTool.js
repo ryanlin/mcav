@@ -11,7 +11,7 @@ function NodeTool(props) {
       <Text
         x={props.text_pos.x}
         y={props.text_pos.y}
-        fontSize={20}
+        fontSize={16}
         text={props.text}
         fill="blue"
       />

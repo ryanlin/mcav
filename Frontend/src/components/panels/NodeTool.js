@@ -6,13 +6,6 @@ const CIRCLE_RADIUS = 40;
 function NodeTool(props) {
   return(
     <Group>
-      <Text
-        x={props.text_pos.x}
-        y={props.text_pos.y}
-        fontSize={20}
-        text={props.text}
-        fill="blue"
-      />
       <Circle
         name={props.name}
         x={props.node_pos.x}

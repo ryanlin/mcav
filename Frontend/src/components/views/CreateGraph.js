@@ -1,10 +1,15 @@
 import React, { useState, useRef, useForm } from 'react';
 import { render } from 'react-dom';
 import {Rect, Stage, Layer, Text, Circle, Arrow, Group, Line, Label, Tag} from 'react-konva';
+// import Spinner from 'react-bootstrap/Spinner';
+import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
+import Loader from 'react-loader-spinner';
+
 const {api} = window;
+
 import { CanvasButton, onMouseOverButton, onMouseOutButton, clearCanvas, clearEdges, NodeTool, addGPSCircle, addLidarCircle, onMouseOverNodeTool, onMouseOutNodeTool, CalibrationPanels, onClickCalibrate } from '../panels';
 
-import { Toolbar, NodePanel, DropDown, GraphView } from '../creategraph';
+import { Toolbar, NodePanelKonva, NodePanel, DropDown, GraphView } from '../creategraph';
 
 const INITIAL_STATE = [];
 const TEST_TYPES = ["pose", "point-cloud", "image"];
@@ -26,6 +31,9 @@ const CreateGraph = (props) => {
   var [connectors, setConnectors] = React.useState(INITIAL_STATE);
   var [fromShapeId, setFromShapeId] = React.useState(null);
   var [displayID, setDisplayID] = React.useState("N/A");
+
+  /* temp spinner stuff */
+  const [spinnerVisible, setSpinnerVisible] = useState(false);
 
   /* temp debugging log */
   React.useEffect( () => {
@@ -95,6 +103,7 @@ const CreateGraph = (props) => {
             rosbagPath={props.filePath}
           />
 
+          {/* Graph Canvas */}
           <GraphView
             nodes={circles}
             edges={connectors}
@@ -103,14 +112,16 @@ const CreateGraph = (props) => {
             setSelectedNodeId={setFromShapeId}
           />
 
-          {/*Panel*/}
-          <NodePanel
+          {/*Konva Panel*/}
+          <NodePanelKonva
             displayID={displayID}
           />
 
           {/* Render Calibration Panels*/}
           {calibrations.map((edge, index) => {
-
+            if(spinnerVisible){
+              setSpinnerVisible(false);
+            }
             var newMatrix = [];
             var stringMatrix = [];
             if( edge.matrix != null ) {
@@ -189,7 +200,10 @@ const CreateGraph = (props) => {
       ))}
 
       <button
-        onClick={(e) => onClickCalibrate(circles, connectors, setCalibrations, setPanelVisible, setSaveFile)}
+        onClick={(e) => {
+          setSpinnerVisible(true);
+          onClickCalibrate(circles, connectors, setCalibrations, setPanelVisible, setSaveFile)
+        }}
         style={{
           backgroundColor: "green",
           fontSize: "16px",
@@ -202,6 +216,18 @@ const CreateGraph = (props) => {
         }}
         >
           Calibrate!
+          <Loader
+            id="calibrate-spinner"
+            type="TailSpin"
+            color="#FFFFFF"
+            height={12}
+            width={12}
+            timeout={20000} // 20 seconds
+            visible={spinnerVisible}
+            style={{
+              display: "inline"
+            }}
+          />
       </button>
 
       <button

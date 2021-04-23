@@ -29,7 +29,7 @@ function Toolbar(props) {
       key: 0,
       id: "node_tool",
       name: "draggableCircle",
-      text: "GPS",
+      text: "Sensor",
       text_pos: {x:35, y:170},
       circ_pos: {x:140, y:180},
       onDragEnd: (e) => addNode(e, props.nodes, props.setNodes, props.rosbagPath)
