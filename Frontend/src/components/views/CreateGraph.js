@@ -34,6 +34,7 @@ const CreateGraph = (props) => {
 
   /* temp spinner stuff */
   const [spinnerVisible, setSpinnerVisible] = useState(false);
+  const [importSpinnerVisible, setImportSpinnerVisible] = useState(false);
 
   /* temp debugging log */
   React.useEffect( () => {
@@ -165,6 +166,7 @@ const CreateGraph = (props) => {
 
       <button
         onClick={() => {
+          setImportSpinnerVisible(true)
           api.rosbag("rosbag", fileState.path);
           api.receive("bagfile", (res) => {
             console.log("bagfile recieved");
@@ -172,6 +174,9 @@ const CreateGraph = (props) => {
             console.log(topicList);
 
             setBagTopics(topicList);
+
+            // bandaid spinner stuff
+            setImportSpinnerVisible(false);
 
           }, []);
         }}
@@ -182,6 +187,18 @@ const CreateGraph = (props) => {
         }}
       >
         Import bag file
+        <Loader
+          id="calibrate-spinner"
+          type="TailSpin"
+          color="#00BFFF"
+          height={12}
+          width={12}
+          timeout={2000000} // 20000 seconds
+          visible={importSpinnerVisible}
+          style={{
+            display: "inline"
+          }}
+        />
       </button>
 
       {/* NodePanel Dropdowns */}
@@ -222,7 +239,7 @@ const CreateGraph = (props) => {
             color="#FFFFFF"
             height={12}
             width={12}
-            timeout={20000} // 20 seconds
+            timeout={2000000} // 2000 seconds
             visible={spinnerVisible}
             style={{
               display: "inline"
