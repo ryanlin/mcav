@@ -1,6 +1,7 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, Menu, MenuItem, dialog, ipcMain } = require('electron');
+const fs = require('fs');
 const path = require('path');
-const menu = require('./components/menu/menu');
+//const menu = require('./components/menu/menu');
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
@@ -10,7 +11,7 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
 let window = null;
 
 // Configure Menu Bar Items
-menu.setMenu();
+//menu.setMenu();
 
 const createWindow = () => {
   // Create the browser window.
@@ -30,6 +31,123 @@ const createWindow = () => {
   // Open the DevTools.
   window.webContents.openDevTools();
 };
+
+const template = [
+   {
+     label: 'File',
+     submenu: [
+       {
+         label: 'Save Graph',
+         click() {
+               console.log('item 1 clicked');
+         }
+       },
+       {
+         label: 'Load Graph',
+         click() {
+           dialog.showOpenDialog({
+               properties: ['openFile']
+             })
+             .then(function(fileObj) {
+                 // the fileObj has two props
+                 if (!fileObj.canceled) {
+                   console.log(fileObj.filePaths);
+                   let rawdata = fs.readFileSync(path.resolve(__dirname, fileObj.filePaths[0]));
+                   let jsonFile = JSON.parse(rawdata);
+                   console.log(jsonFile);
+                   window.webContents.send('load_graph', jsonFile);
+                 }
+              })
+              // should always handle the error yourself, later Electron release might crash if you don't
+              .catch(function(err) {
+                 console.error(err)
+              })
+         }
+       },
+       {
+         role: 'quit'
+       }
+     ]
+   },
+
+   {
+      label: 'Edit',
+      submenu: [
+         {
+            role: 'undo'
+         },
+         {
+            role: 'redo'
+         },
+         {
+            type: 'separator'
+         },
+         {
+            role: 'cut'
+         },
+         {
+            role: 'copy'
+         },
+         {
+            role: 'paste'
+         }
+      ]
+   },
+
+   {
+      label: 'View',
+      submenu: [
+         {
+            role: 'reload'
+         },
+         {
+            role: 'toggledevtools'
+         },
+         {
+            type: 'separator'
+         },
+         {
+            role: 'resetzoom'
+         },
+         {
+            role: 'zoomin'
+         },
+         {
+            role: 'zoomout'
+         },
+         {
+            type: 'separator'
+         },
+         {
+            role: 'togglefullscreen'
+         }
+      ]
+   },
+
+   {
+      role: 'window',
+      submenu: [
+         {
+            role: 'minimize'
+         },
+         {
+            role: 'close'
+         }
+      ]
+   },
+
+   {
+      role: 'help',
+      submenu: [
+         {
+            label: 'Learn More'
+         }
+      ]
+   }
+]
+
+const menu = Menu.buildFromTemplate(template)
+Menu.setApplicationMenu(menu)
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.

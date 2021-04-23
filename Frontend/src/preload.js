@@ -47,7 +47,7 @@ contextBridge.exposeInMainWorld(
 		}
 	},
 	receive: (channel, cb) => {
-    	const allowedChannels = ["bagfile", "calibration"];
+    	const allowedChannels = ["bagfile", "calibration", "load_graph"];
     	if(allowedChannels.includes(channel)) {
       		ipcRenderer.on(channel, (event, ...args) => cb(...args));
     	}
@@ -118,7 +118,7 @@ function findTopics(results)
 
 //Performs back-end calibration script with the passed JSON graph from the front-end//
 function calibration(inputGraph) {
-	
+
 	var jsonStr = JSON.stringify(inputGraph);
 	//console.log("Passed Graph: \n" + jsonStr);
 
@@ -193,4 +193,3 @@ function saveGraph(jsonPath) {
 		}
 	});
 }
-
