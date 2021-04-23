@@ -11,14 +11,15 @@ function CalibrationPanels(props) {
       x={props.x}
       y={props.y}
       onDblClick={() => {
-        navigator.clipboard.writeText(props.matrix.join());
+        //navigator.clipboard.writeText(props.matrix.join());
+        navigator.clipboard.writeText(props.matrix);
         alert("Matrix Copied");
       }}
       visible={props.visible}
     >
       <Rect
         width={200}
-        height={100}
+        height={70}
         fill="orange"
         cornerRadius={10}
       />
@@ -99,7 +100,9 @@ function returnMatrixPosition(node1, node2) {
   var slope = getSlope(node1.x, node1.y, node2.x, node2.y);
   var midpoint = getMidpoint(node1.x, node1.y, node2.x, node2.y);
   var position = midpoint;
-  if( slope > 0 ) {
+  position.x -= 100;
+  position.y -= 35;
+  /*if( slope > 0 ) {
     position.x -= 40;
   }
   else if( slope < 0 ) {
@@ -107,7 +110,7 @@ function returnMatrixPosition(node1, node2) {
   }
   else {
     position.y += 40;
-  }
+  }*/
   return position;
 }
 
