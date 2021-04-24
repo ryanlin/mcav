@@ -18,6 +18,7 @@ const createWindow = () => {
   window = new BrowserWindow({
     width: 800,
     height: 600,
+    icon: path.join(__dirname, "../build/car_logo.png"),
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
