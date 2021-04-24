@@ -28,126 +28,13 @@ const createWindow = () => {
   // and load the index.html of the app.
   window.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
+  // Set Menu Options
+  const { setMenu } = require("./main_modules/menu.js");
+  setMenu(window);
+
   // Open the DevTools.
   window.webContents.openDevTools();
 };
-
-const template = [
-   {
-     label: 'File',
-     submenu: [
-       {
-         label: 'Save Graph',
-         click() {
-               console.log('item 1 clicked');
-         }
-       },
-       {
-         label: 'Load Graph',
-         click() {
-           dialog.showOpenDialog({
-               properties: ['openFile']
-             })
-             .then(function(fileObj) {
-                 // the fileObj has two props
-                 if (!fileObj.canceled) {
-                   console.log(fileObj.filePaths);
-                   let rawdata = fs.readFileSync(path.resolve(__dirname, fileObj.filePaths[0]));
-                   let jsonFile = JSON.parse(rawdata);
-                   console.log(jsonFile);
-                   window.webContents.send('load_graph', jsonFile);
-                 }
-              })
-              // should always handle the error yourself, later Electron release might crash if you don't
-              .catch(function(err) {
-                 console.error(err)
-              })
-         }
-       },
-       {
-         role: 'quit'
-       }
-     ]
-   },
-
-   {
-      label: 'Edit',
-      submenu: [
-         {
-            role: 'undo'
-         },
-         {
-            role: 'redo'
-         },
-         {
-            type: 'separator'
-         },
-         {
-            role: 'cut'
-         },
-         {
-            role: 'copy'
-         },
-         {
-            role: 'paste'
-         }
-      ]
-   },
-
-   {
-      label: 'View',
-      submenu: [
-         {
-            role: 'reload'
-         },
-         {
-            role: 'toggledevtools'
-         },
-         {
-            type: 'separator'
-         },
-         {
-            role: 'resetzoom'
-         },
-         {
-            role: 'zoomin'
-         },
-         {
-            role: 'zoomout'
-         },
-         {
-            type: 'separator'
-         },
-         {
-            role: 'togglefullscreen'
-         }
-      ]
-   },
-
-   {
-      role: 'window',
-      submenu: [
-         {
-            role: 'minimize'
-         },
-         {
-            role: 'close'
-         }
-      ]
-   },
-
-   {
-      role: 'help',
-      submenu: [
-         {
-            label: 'Learn More'
-         }
-      ]
-   }
-]
-
-const menu = Menu.buildFromTemplate(template)
-Menu.setApplicationMenu(menu)
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.

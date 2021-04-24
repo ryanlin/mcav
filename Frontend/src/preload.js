@@ -47,7 +47,7 @@ contextBridge.exposeInMainWorld(
 		}
 	},
 	receive: (channel, cb) => {
-    	const allowedChannels = ["bagfile", "calibration", "load_graph"];
+    	const allowedChannels = ["bagfile", "calibration", "loadGraph"];
     	if(allowedChannels.includes(channel)) {
       		ipcRenderer.on(channel, (event, ...args) => cb(...args));
     	}

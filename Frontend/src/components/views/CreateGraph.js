@@ -90,7 +90,7 @@ const CreateGraph = (props) => {
   }
 
   /* Sets graph from file, rlly bad, rushed for video, redo*/
-  api.receive("load_graph", (res) => {
+  api.receive("loadGraph", (res) => {
     console.log("graph file recieved");
     console.log(res);
     setCircles(res.nodes);
