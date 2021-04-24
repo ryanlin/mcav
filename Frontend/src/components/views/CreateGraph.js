@@ -12,6 +12,12 @@ import { CanvasButton, onMouseOverButton, onMouseOutButton, clearCanvas, clearEd
 import { Toolbar, NodePanelKonva, NodePanel, DropDown, GraphView } from '../creategraph';
 
 const INITIAL_STATE = [];
+const INITIAL_GRAPH = {
+  numberOfNodes: 0,
+  numberOfEdges: 0,
+  nodes: [],
+  edges: []
+}
 const TEST_TYPES = ["pose", "point-cloud", "image"];
 
 var topicList = [];
@@ -21,7 +27,7 @@ const CreateGraph = (props) => {
   const [bagTopics, setBagTopics] = useState(INITIAL_STATE);
   const [fileState, setFileState] = useState("null");
   const [topic, setTopic] = useState("null");
-  var [saveFile, setSaveFile] = useState("null");
+  const [calibrationGraph, setCalibrationGraph] = useState(INITIAL_GRAPH);
 
   const stageRef = useRef(null);
   const layerRef = useRef(null);
@@ -36,9 +42,15 @@ const CreateGraph = (props) => {
   const [spinnerVisible, setSpinnerVisible] = useState(false);
   const [importSpinnerVisible, setImportSpinnerVisible] = useState(false);
 
-  /* temp debugging log */
+  /* When nodes or edges change, log them and set calibrationGraph */
   React.useEffect( () => {
     console.log("circles: ", circles, "\nconnectors: ", connectors);
+    setCalibrationGraph({
+      numberOfNodes: circles.length,
+      numberOfEdges: connectors.length,
+      nodes: circles,
+      edges: connectors
+    });
   }, [circles, connectors]);
 
   React.useEffect( () => {
@@ -47,6 +59,10 @@ const CreateGraph = (props) => {
 
   React.useEffect( () => {
     console.log("calibrations: ", calibrations || null);
+  }, [calibrations]);
+
+  React.useEffect( () => {
+    console.log("calibrationGraph: ", calibrationGraph || null);
   }, [calibrations]);
 
   /* Bandaid List for DropDowns */
@@ -262,7 +278,7 @@ const CreateGraph = (props) => {
       <button
         onClick={(e) => {
           setSpinnerVisible(true);
-          onClickCalibrate(circles, connectors, setCalibrations, setPanelVisible, setSaveFile)
+          onClickCalibrate(circles, connectors, setCalibrations, setPanelVisible)
         }}
         style={{
           backgroundColor: "green",
@@ -292,7 +308,7 @@ const CreateGraph = (props) => {
 
       <button
         onClick={() => {
-          const fileData = JSON.stringify(saveFile, null, 4);
+          const fileData = JSON.stringify(calibrationGraph, null, 4);
           const blob = new Blob([fileData], {type: "text/plain"});
           const url = URL.createObjectURL(blob);
           const link = document.createElement('a');

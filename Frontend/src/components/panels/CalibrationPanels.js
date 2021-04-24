@@ -34,8 +34,7 @@ function CalibrationPanels(props) {
 }
 
 //Event handler for clicking the calibrate button//
-function onClickCalibrate(circles, connectors, setCalibrations, setPanelVisible, setSaveFile) {
-
+function onClickCalibrate(circles, connectors, setCalibrations, setPanelVisible) {
   var fullGraph = {
     numberOfNodes: circles.length,
     numberOfEdges: connectors.length,
@@ -47,7 +46,6 @@ function onClickCalibrate(circles, connectors, setCalibrations, setPanelVisible,
 
   //console.log(fullGraph);
   api.calibration("calibration", fullGraph);
-  setSaveFile(fullGraph);
 }
 
 //Listen for calibration channel to return a response//
