@@ -1,7 +1,5 @@
-const { app, BrowserWindow, Menu, MenuItem, dialog, ipcMain } = require('electron');
-const fs = require('fs');
+const { app, BrowserWindow } = require('electron');
 const path = require('path');
-//const menu = require('./components/menu/menu');
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
@@ -9,9 +7,6 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
 }
 
 let window = null;
-
-// Configure Menu Bar Items
-//menu.setMenu();
 
 const createWindow = () => {
   // Create the browser window.
@@ -33,6 +28,10 @@ const createWindow = () => {
   const { setMenu } = require("./main_modules/menu.js");
   setMenu(window);
 
+  // Initializing Message Passing Event Listeners //
+  const { initializeMessagePassingListeners } = require("./main_modules/ipcMain_functions.js");
+  initializeMessagePassingListeners(window);
+
   // Open the DevTools.
   window.webContents.openDevTools();
 };
@@ -51,21 +50,10 @@ app.on('window-all-closed', () => {
   }
 });
 
+// On OS X it's common to re-create a window in the app when the
+// dock icon is clicked and there are no other windows open.
 app.on('activate', () => {
-  // On OS X it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
   }
 });
-
-ipcMain.on("bagfile", (event, data) => {
-  window.webContents.send("bagfile", data);
-})
-
-ipcMain.on("calibration", (event, data) => {
-  window.webContents.send("calibration", data);
-})
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and import them here.
