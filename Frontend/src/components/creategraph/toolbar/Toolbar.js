@@ -20,7 +20,7 @@ function Toolbar(props) {
       x: 70,
       y: 95,
       value: "Clear Edges",
-      onClick: (e) => clearEdges(e, props.setEdges)
+      onClick: (e) => clearEdges(e, props.setEdges, props.setCalibrations)
     }
   ];
 
@@ -122,9 +122,10 @@ function clearCanvas(e, setNodes, setEdges, setCalibrations) {
 }
 
 // Clears Edges
-function clearEdges(e, setEdges) {
+function clearEdges(e, setEdges, setCalibrations) {
   const empty = [];
   setEdges(empty);
+  setCalibrations(empty);
 
   // Delete edge arrays in preload.js
   //api.clearEdges("clearEdges");
