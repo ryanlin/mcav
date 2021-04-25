@@ -220,6 +220,7 @@ const CreateGraph = (props) => {
           left: 30
         }}
         onChange={handleFileUpload}
+        accept=".bag"
       >
       </input>
 
