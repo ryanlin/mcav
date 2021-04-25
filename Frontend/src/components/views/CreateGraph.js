@@ -225,22 +225,30 @@ const CreateGraph = (props) => {
       </input>
 
       <button
-        onClick={() => {
-          setImportSpinnerVisible(true)
+        onClick={(e) => {
+          console.log("rosbag clicked");
+
+          setImportSpinnerVisible(true);
+
+          // bandaid action listener disable
+          e.target.disabled = true;
+
           api.rosbag("rosbag", fileState.path);
           api.receive("bagfile", (res) => {
             console.log("bagfile response recieved");
             topicList = JSON.parse(JSON.stringify(res));
-            if(!Array.isArray(topicList))
+
+
+            if(Array.isArray(topicList))
             {
-              console.log("Error: " + topicList.toString());
-            }
-            else {
               setBagTopics(topicList);
             }
 
             // bandaid spinner stuff
             setImportSpinnerVisible(false);
+
+            // bandaid action listener reenable
+            e.target.disabled = false;
 
           }, []);
         }}
@@ -281,9 +289,8 @@ const CreateGraph = (props) => {
       ))}
 
       <button
-        onClick={(e) => {
-          setSpinnerVisible(true);
-          onClickCalibrate(circles, connectors, setCalibrations, setPanelVisible, setSpinnerVisible)
+        onClick={ (e) => {
+          onClickCalibrate(e, circles, connectors, setCalibrations, setPanelVisible, setSpinnerVisible)
         }}
         style={{
           backgroundColor: "green",

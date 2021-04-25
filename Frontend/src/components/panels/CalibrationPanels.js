@@ -34,7 +34,7 @@ function CalibrationPanels(props) {
 }
 
 //Event handler for clicking the calibrate button//
-function onClickCalibrate(circles, connectors, setCalibrations, setPanelVisible, setSpinnerVisible) {
+function onClickCalibrate(e, circles, connectors, setCalibrations, setPanelVisible, setSpinnerVisible) {
   var fullGraph = {
     numberOfNodes: circles.length,
     numberOfEdges: connectors.length,
@@ -42,18 +42,22 @@ function onClickCalibrate(circles, connectors, setCalibrations, setPanelVisible,
     edges: connectors
   };
 
-  enableCalibrationListener(circles, connectors, setCalibrations, setPanelVisible, setSpinnerVisible);
+  // Bandaid fix for spinner enable
+  setSpinnerVisible(true);
+
+  // Bandaid fix for button action listener disable
+  e.target.disabled = true;
+
+  enableCalibrationListener(e, circles, connectors, setCalibrations, setPanelVisible, setSpinnerVisible);
 
   //console.log(fullGraph);
   api.calibration("calibration", fullGraph);
 }
 
 //Listen for calibration channel to return a response//
-function enableCalibrationListener(circles, connectors, setCalibrations, setPanelVisible, setSpinnerVisible) {
+function enableCalibrationListener(e, circles, connectors, setCalibrations, setPanelVisible, setSpinnerVisible) {
   api.receive("calibration", (res) => {
     console.log("calibration recieved");
-
-    console.log(res);
 
     if(Array.isArray(res))
     {
@@ -83,8 +87,11 @@ function enableCalibrationListener(circles, connectors, setCalibrations, setPane
       setPanelVisible(true);
     }
 
-    //TO DO: Stop spinning the spinner//
+    // Bandaid fix for spinner
     setSpinnerVisible(false);
+
+    // Bandaid fix for action listener re-enable
+    e.target.disabled = false;
 
   }, []);
 }
