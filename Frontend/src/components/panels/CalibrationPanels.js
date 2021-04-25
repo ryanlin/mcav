@@ -34,7 +34,7 @@ function CalibrationPanels(props) {
 }
 
 //Event handler for clicking the calibrate button//
-function onClickCalibrate(circles, connectors, setCalibrations, setPanelVisible) {
+function onClickCalibrate(circles, connectors, setCalibrations, setPanelVisible, setSpinnerVisible) {
   var fullGraph = {
     numberOfNodes: circles.length,
     numberOfEdges: connectors.length,
@@ -42,41 +42,50 @@ function onClickCalibrate(circles, connectors, setCalibrations, setPanelVisible)
     edges: connectors
   };
 
-  enableCalibrationListener(circles, connectors, setCalibrations, setPanelVisible);
+  enableCalibrationListener(circles, connectors, setCalibrations, setPanelVisible, setSpinnerVisible);
 
   //console.log(fullGraph);
   api.calibration("calibration", fullGraph);
 }
 
 //Listen for calibration channel to return a response//
-function enableCalibrationListener(circles, connectors, setCalibrations, setPanelVisible) {
+function enableCalibrationListener(circles, connectors, setCalibrations, setPanelVisible, setSpinnerVisible) {
   api.receive("calibration", (res) => {
     console.log("calibration recieved");
 
-    mergeCalibrationOutputs(connectors, res);
+    console.log(res);
 
-    connectors.forEach( connector => {
-      var sourceNode, targetNode;
-      circles.forEach( circle => {
-        if( circle.key == connector.sourceNodeKey ) {
-          sourceNode = circle;
-        }
-        else if( circle.key == connector.targetNodeKey ) {
-          targetNode = circle;
-        }
+    if(Array.isArray(res))
+    {
+      mergeCalibrationOutputs(connectors, res);
+
+      connectors.forEach( connector => {
+        var sourceNode, targetNode;
+        circles.forEach( circle => {
+          if( circle.key == connector.sourceNodeKey ) {
+            sourceNode = circle;
+          }
+          else if( circle.key == connector.targetNodeKey ) {
+            targetNode = circle;
+          }
+        });
+        var position = returnMatrixPosition(sourceNode, targetNode);
+        connector.x = position.x;
+        connector.y = position.y;
       });
-      var position = returnMatrixPosition(sourceNode, targetNode);
-      connector.x = position.x;
-      connector.y = position.y;
-    });
 
-    //CHANGE Matrix Panels//
-    console.log(circles);
-    console.log(connectors);
+      //CHANGE Matrix Panels//
+      console.log(circles);
+      console.log(connectors);
 
-    setCalibrations(connectors);
+      setCalibrations(connectors);
 
-    setPanelVisible(true);
+      setPanelVisible(true);
+    }
+
+    //TO DO: Stop spinning the spinner//
+    setSpinnerVisible(false);
+
   }, []);
 }
 

@@ -73,8 +73,10 @@ function rosbagRun(input) {
 
 	if( input.substring(input.length-4, input.length) != ".bag" )
 	{
-		console.log("Import Failed: imported file is not a rosbag file");
-		alert("Import Failed: imported file is not a rosbag file");
+    var errMessage = "Import Failed: imported file is not a rosbag file";
+		console.log(errMessage);
+		alert(errMessage);
+    ipcRenderer.send("bagfile", errMessage);
 	}
 	else
 	{
@@ -89,6 +91,7 @@ function rosbagRun(input) {
 			if(err) {
 				console.log("Import Failed: " + err.toString());
 				alert("Import Failed: " + err.toString());
+        ipcRenderer.send("bagfile", err.toString());
 				throw err;
 			}
 			else {
@@ -124,12 +127,14 @@ function calibration(inputGraph) {
 
 	if( inputGraph.numberOfNodes == undefined || inputGraph.numberOfNodes <= 1 || inputGraph.numberOfEdges == 0)
 	{
-		console.log("GRAPH ERROR: Need at least 2 nodes with 1 edge between them.");
-		alert("GRAPH ERROR: Need at least 2 nodes with 1 edge between them.");
+    var errMessage = "GRAPH ERROR: Need at least 2 nodes with 1 edge between them.";
+		console.log(errMessage);
+		alert(errMessage);
+    ipcRenderer.send("calibration", errMessage);
 	}
 	else
 	{
-    	frontendGraph = inputGraph;
+    frontendGraph = inputGraph;
 
 		let options = {
 			mode: 'text',
@@ -140,6 +145,7 @@ function calibration(inputGraph) {
 			if (err) {
 				console.log("CALIBRATION ERROR: " + err.toString());
 				alert("CALIBRATION ERROR: " + err.toString());
+        ipcRenderer.send("calibration", err.toString());
 				throw err;
 			}
 			else {
@@ -147,20 +153,20 @@ function calibration(inputGraph) {
 
 				ipcRenderer.send("calibration", calResult);
 
-				//Gets list of returned matrices//
-				// var matrixResults = [];
-				// for( var i = 2; i < results.length; i++ ) {
-				//   matrixResults.push( results[i] );
-				// }
+				//Gets list of returned edges//
+				var edgeResults = [];
+				for( var i = 0; i < results.length; i++ ) {
+				  edgeResults.push( results[i] );
+				}
 
-				// matrixResults[0] = matrixResults[0].replaceAll("\'", "\"");
-				// matrixResults[0] = matrixResults[0].replaceAll("True", "true");
-				// matrixResults[0] = matrixResults[0].replaceAll("False", "false");
+				edgeResults[0] = edgeResults[0].replaceAll("\'", "\"");
+				edgeResults[0] = edgeResults[0].replaceAll("True", "true");
+				edgeResults[0] = edgeResults[0].replaceAll("False", "false");
 
-				// var matr = matrixResults[0];
+				var matr = edgeResults[0];
 
-				// backendGraph = JSON.parse(matr);
-       	//createFullGraph();
+				backendGraph = JSON.parse(matr);
+       	createFullGraph();
 			}
 		});
 	}
@@ -186,8 +192,9 @@ function saveGraph(jsonPath) {
     };
 
     PythonShell.run('python/save_json.py', options, function (err, results) {
-		if (err) throw err;
-
+		if (err){
+      throw err;
+    }
 		else {
 			saveResult.textContent = "Graph Saved";
 		}
