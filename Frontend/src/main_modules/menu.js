@@ -8,7 +8,7 @@ function buildTemplate(window) {
       submenu: [
         {
           label: 'Save Graph',
-          click: async () => MenuFunctions.saveGraph()
+          click: async () => MenuFunctions.saveGraph(window)
         },
         {
           label: 'Load Graph',

@@ -46,8 +46,14 @@ contextBridge.exposeInMainWorld(
 			saveGraph(jsonPath);
 		}
 	},
+	send: (channel, data) => {
+		const validChannels = ["saveGraph"];
+		if( validChannels.includes(channel) ) {
+			ipcRenderer.send(channel, data);
+		}
+	},
 	receive: (channel, cb) => {
-    	const allowedChannels = ["bagfile", "calibration", "loadGraph"];
+    	const allowedChannels = ["bagfile", "calibration", "loadGraph", "saveGraph"];
     	if(allowedChannels.includes(channel)) {
       		ipcRenderer.on(channel, (event, ...args) => cb(...args));
     	}

@@ -29,6 +29,10 @@ const CreateGraph = (props) => {
   const [topic, setTopic] = useState("null");
   const [calibrationGraph, setCalibrationGraph] = useState(INITIAL_GRAPH);
 
+  // ref to make saveGraph work, TODO seek better solution
+  const graphRef = React.useRef();
+  graphRef.current = calibrationGraph;
+
   const stageRef = useRef(null);
   const layerRef = useRef(null);
 
@@ -61,6 +65,10 @@ const CreateGraph = (props) => {
   React.useEffect( () => {
     console.log("calibrations: ", calibrations || null);
   }, [calibrations]);
+
+  React.useEffect( () => {
+    console.log("graph: ", calibrationGraph || null);
+  }, [calibrationGraph]);
 
   React.useEffect( () => {
     console.log("bagTopics: ", bagTopics || null);
@@ -154,6 +162,12 @@ const CreateGraph = (props) => {
     });
   }, []);
 
+
+  React.useEffect( () => {
+    api.receive("saveGraph", () => {
+      api.send("saveGraph", graphRef.current);
+    });
+  }, []);
 
   return (
     <div>
