@@ -20,7 +20,7 @@ function UploadButton(props) {
       {/* button that looks nice */}
       <button
         className="menu-container-button"
-        onClick={() => props.onClick("yuh")}
+        onClick={() => props.onClick("uploadbutton")}
       >
         {props.text}
       </button>
