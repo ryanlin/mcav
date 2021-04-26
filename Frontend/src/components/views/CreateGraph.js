@@ -38,9 +38,10 @@ const CreateGraph = (props) => {
   var [fromShapeId, setFromShapeId] = React.useState(null);
   var [displayID, setDisplayID] = React.useState("N/A");
 
-  /* temp spinner stuff */
+  /* temp bandaids */
   const [spinnerVisible, setSpinnerVisible] = useState(false);
   const [importSpinnerVisible, setImportSpinnerVisible] = useState(false);
+  const [importDisabled, setImportDisabled] = useState(false);
 
   /* When nodes or edges change, log them and set calibrationGraph */
   React.useEffect( () => {
@@ -62,8 +63,8 @@ const CreateGraph = (props) => {
   }, [calibrations]);
 
   React.useEffect( () => {
-    console.log("calibrationGraph: ", calibrationGraph || null);
-  }, [calibrations]);
+    console.log("bagTopics: ", bagTopics || null);
+  }, [bagTopics]);
 
   /* Bandaid List for DropDowns */
   const lists = [
@@ -105,33 +106,46 @@ const CreateGraph = (props) => {
     // console.log(circles);
   }
 
-  /* Sets graph from file, rlly bad, rushed for video, redo*/
-  api.receive("loadGraph", (res) => {
-    console.log("graph file recieved");
-    console.log(res);
-    setCircles(res.nodes);
-    setConnectors(res.edges);
-    setCalibrations(res.edges);
-    //var graph_loaded = JSON.parse(res);
+  // Sets receive for graph from preload/ipcRenderer
+  React.useEffect( () => {
+    api.receive("loadGraph", (res) => {
+      console.log("graph file received");
+      console.log(res);
 
-    // Get topics
-    const bagPath = res.nodes[0].rosbagPath;
-    setFileState({
-      path: bagPath
-    })
-    console.log(bagPath);
-    api.rosbag("rosbag", bagPath);
+      setCircles(res.nodes);
+      setConnectors(res.edges);
+      setCalibrations(res.edges);
+
+      // Get topics
+      const bagPath = res.nodes[0].rosbagPath;
+      setFileState({
+        path: bagPath
+      })
+      console.log(bagPath);      
+      api.rosbag("rosbag", bagPath);
+    });
+  }, []);
+
+  // Sets receive for topics from preload/ipcRenderer
+  React.useEffect( () => {
     api.receive("bagfile", (res) => {
-      console.log("bagfile recieved");
-      topicList = JSON.parse(JSON.stringify(res));
-      console.log(topicList);
+      console.log("topics received");
 
-      setBagTopics(topicList);
+      topicList = JSON.parse(JSON.stringify(res));
+
+      if(Array.isArray(topicList))
+      {
+        setBagTopics(topicList);
+      }
+
+      // bandaid reenable Import bag button
+      setImportDisabled(false);
 
       // bandaid spinner stuff
       setImportSpinnerVisible(false);
-    }, []);
+    });
   }, []);
+
 
   return (
     <div>
@@ -225,38 +239,20 @@ const CreateGraph = (props) => {
       </input>
 
       <button
+        id={"import-bag-button"}
         onClick={(e) => {
           console.log("rosbag clicked");
-
+          // bandaid disable button
+          setImportDisabled(true);
           setImportSpinnerVisible(true);
-
-          // bandaid action listener disable
-          e.target.disabled = true;
-
           api.rosbag("rosbag", fileState.path);
-          api.receive("bagfile", (res) => {
-            console.log("bagfile response recieved");
-            topicList = JSON.parse(JSON.stringify(res));
-
-
-            if(Array.isArray(topicList))
-            {
-              setBagTopics(topicList);
-            }
-
-            // bandaid spinner stuff
-            setImportSpinnerVisible(false);
-
-            // bandaid action listener reenable
-            e.target.disabled = false;
-
-          }, []);
         }}
         style={{
           position: 'absolute',
           top: 543,
           left: 30
         }}
+        disabled={importDisabled}
       >
         Import bag file
         <Loader
