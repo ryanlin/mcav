@@ -18,14 +18,14 @@ function loadGraph(window) {
   // Open dialog to choose file
   dialog.showOpenDialog({
     properties: ['openFile'],
-    filters: [ {name: 'Graphs', extensions: ['mcav']} ]
+    filters: [ {name: 'mcav', extensions: ['mcav']} ]
   })
   .then(function(fileObj) {
     // the fileObj has two props
     if (!fileObj.canceled) {
       const filePath = path.resolve(__dirname, fileObj.filePaths[0]);
 
-      const ext = fpath.split('.').pop(); // file extensiom
+      const ext = filePath.split('.').pop(); // file extensiom
 
       console.log(ext);
 
@@ -35,13 +35,8 @@ function loadGraph(window) {
         const rawData = fs.readFileSync(filePath);
         const jsonData = JSON.parse(rawData);
 
-        if ( (jsonData.nodes === undefined) && (jsonData.edges === undefined) ) {
-          // send jsonData for preload.js to take to renderer
-          window.webContents.send('loadGraph', jsonData);
-        } else {
-          console.log("invalid");
-          dialog.showErrorBox("Invalid File", "The file being imported is invalid.");
-        }
+        // send jsonData for preload.js to take to renderer
+        window.webContents.send('loadGraph', jsonData);
       } else {
         console.log("invalid");
         dialog.showErrorBox("Invalid File", "The file being imported is invalid.");
