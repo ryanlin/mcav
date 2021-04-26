@@ -11,7 +11,6 @@ ipcMain.on("saveGraph", (e, graph) => {
 function saveGraph(window) {
   // TODO look into better way to implement savegraph
   // request for saveGraph response from renderer
-  console.log("mainsg");
   window.webContents.send("saveGraph");
 }
 
@@ -28,8 +27,12 @@ function loadGraph(window) {
       const rawData = fs.readFileSync(filePath);
       const jsonData = JSON.parse(rawData);
 
-      // send jsonData for preload.js to take to renderer
-      window.webContents.send('loadGraph', jsonData);
+      if ( jsonData.nodes !== null ) {
+        dialog.showErrorBox("Invalid File", "The file being imported is not in the proper format to be loaded.")
+      } else {
+        // send jsonData for preload.js to take to renderer
+        window.webContents.send('loadGraph', jsonData);
+      }
     }
   })
   .catch(function(err) {
