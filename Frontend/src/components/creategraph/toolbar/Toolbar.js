@@ -52,7 +52,7 @@ function Toolbar(props) {
         x={15}
         y={35}
         width={200}
-        height={300}
+        height={200}
         fill="gray"
         cornerRadius={10}
       />

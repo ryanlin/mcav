@@ -8,7 +8,7 @@ function NodePanelKonva(props) {
       {/* NodePanel Section */}
       <Rect
         x={15}
-        y={375}
+        y={295}
         width={200}
         height={250}
         fill="gray"
@@ -17,17 +17,9 @@ function NodePanelKonva(props) {
       {/* NodePanel Header */}
       <Text
         x={80}
-        y={350}
+        y={270}
         fontSize={20}
         text="Panel"
-        fill="black"
-      />  
-      {/* Sensor Type Text */}
-      <Text
-        x={30}
-        y={395}
-        fontSize={20}
-        text={"Sensor Type: " + props.displayID}
         fill="black"
       />  
     </Group>
