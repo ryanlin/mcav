@@ -24,6 +24,23 @@ const createWindow = () => {
   // and load the index.html of the app.
   window.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
+  // Warn when closing
+  window.on('close', function(e){
+    console.log("hi");
+    var choice = require('electron').dialog.showMessageBoxSync(this,
+      {
+        type: 'question',
+        buttons: ['Yes', 'No'],
+        title: 'Confirm',
+        message: 'Are you sure you want to quit?'
+      }
+    );
+    
+    if(choice == 1){
+      e.preventDefault();
+    }
+  });
+
   // Set Menu Options
   const { setMenu } = require("./main_modules/menu.js");
   setMenu(window);
