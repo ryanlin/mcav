@@ -106,13 +106,17 @@ const CreateGraph = (props) => {
 
   /*Handlers*/
   const handleFileUpload = e => {
-    const path = e.target.files[0].path;
-    const ext = path.split('.').pop // file extensiom
+    if (e.target.files[0]) {
+      const fpath =  e.target.files[0].path;
+      const ext = fpath.split('.').pop(); // file extensiom
 
-    if ( ext === ".bag") {
-      setFileState(e.target.files[0]);      
-    } else {
-      alert("The chosen file is invalid. \nPlease choose a different type. \nAccepted file extensions: .bag)");
+      console.log(ext);
+
+      if ( ext === "bag") {
+        setFileState(e.target.files[0]);      
+      } else {
+        alert("The chosen file is invalid. \nPlease choose a different type. \nAccepted file extensions: .bag)");
+      }
     }
   }
 
