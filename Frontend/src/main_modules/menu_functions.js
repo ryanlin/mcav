@@ -5,7 +5,6 @@ const { type } = require('os');
 
 // setup receiver from renderer for getGraph
 ipcMain.on("saveGraph", (e, graph) => {
-  console.log("saveGraph: ", graph);
   writeToFile(graph, "untitled", ".json");
 });
 
@@ -56,15 +55,9 @@ function writeToFile(data, filename, extension) {
       console.log(savePath);
 
       let saveData = "";
-      let blob;
-      console.log("data: ", data);
       if (typeof(data) !== "string") {
-        console.log("typeof: ", typeof(data));
-        //saveData = JSON.stringify(data);
         saveData = JSON.stringify(data, null, 2);
-        // blob = new Blob([fileData], {type: "text/plain"});
       }
-      console.log("saveData: ", data);
 
       fs.writeFile(savePath, saveData, (err) => {
         if (err) throw err;
