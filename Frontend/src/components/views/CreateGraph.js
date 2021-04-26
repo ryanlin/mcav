@@ -212,6 +212,7 @@ const CreateGraph = (props) => {
                     stringPanel += ", ";
                   }
               }
+              stringPanel += " Error score: " + (Math.round(edge.errScore * Math.pow(10.0, 14.0)) / Math.pow(10.0, 14.0)).toString();
             }
 
             return (
