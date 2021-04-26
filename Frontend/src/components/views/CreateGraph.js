@@ -106,11 +106,18 @@ const CreateGraph = (props) => {
 
   /*Handlers*/
   const handleFileUpload = e => {
-    // upload files
-    setFileState(e.target.files[0]);
+    if (e.target.files[0]) {
+      const fpath =  e.target.files[0].path;
+      const ext = fpath.split('.').pop(); // file extensiom
 
-    // console.log(e.target.files[0].path);
-    // console.log(circles);
+      console.log(ext);
+
+      if ( ext === "bag") {
+        setFileState(e.target.files[0]);      
+      } else {
+        alert("The chosen file is invalid. \nPlease choose a different type. \nAccepted file extensions: .bag)");
+      }
+    }
   }
 
   // Sets receive for graph from preload/ipcRenderer

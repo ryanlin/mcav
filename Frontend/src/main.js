@@ -26,7 +26,6 @@ const createWindow = () => {
 
   // Warn when closing
   window.on('close', function(e){
-    console.log("hi");
     var choice = require('electron').dialog.showMessageBoxSync(this,
       {
         type: 'question',
