@@ -229,17 +229,19 @@ const CreateGraph = (props) => {
               stringPanel += " Error score: " + (Math.round(edge.errScore * Math.pow(10.0, 14.0)) / Math.pow(10.0, 14.0)).toString();
             }
 
-            return (
-            //if(edge.matrix != null) {
-            //var newMatrix = edge.matrix ? edge.matrix : [];
-              <CalibrationPanels
-                key={index}
-                x={edge.x}
-                y={edge.y}
-                matrix={stringPanel}
-                //visible={panelVisible}
-              />
-            );
+            if(edge && edge.x) {
+              return (
+                //if(edge.matrix != null) {
+                //var newMatrix = edge.matrix ? edge.matrix : [];
+                  <CalibrationPanels
+                    key={index}
+                    x={edge.x}
+                    y={edge.y}
+                    matrix={stringPanel}
+                    //visible={panelVisible}
+                  />
+                );
+            }
             //}
           })}
 
