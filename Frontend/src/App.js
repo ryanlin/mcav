@@ -7,20 +7,20 @@ import { MainMenu, CreateGraph } from "./components";
 import './index.css';
 
 function App() {
-  const [filePath, setFilePath] = React.useState(null);
+  const [tempSwitch, setTempSwitch] = React.useState(null);
   
   return (
     <div className="app">
       <h1>mcav 9000</h1>
       <hr/>
       <div label="Main">
-        { filePath ?
+        { tempSwitch ?
           <CreateGraph
-            filePath={filePath}
+            filePath={tempSwitch}
           /> :
           <MainMenu
-            filePath={filePath}
-            setFilePath={setFilePath}
+            filePath={tempSwitch}
+            setFilePath={() => setTempSwitch(true)}
           />
         }
       </div>

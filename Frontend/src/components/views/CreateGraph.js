@@ -136,6 +136,14 @@ const CreateGraph = (props) => {
       if(Array.isArray(topicList))
       {
         setBagTopics(topicList);
+      } else {
+        setFileState({
+          path: null
+        })
+        const nodes = circles;
+        nodes.forEach( (node) => {
+          node.rosbagPath = null;
+        });
       }
 
       // bandaid reenable Import bag button
@@ -163,7 +171,7 @@ const CreateGraph = (props) => {
             setNodes={setCircles}
             setEdges={setConnectors}
             setCalibrations={setCalibrations}
-            rosbagPath={props.filePath}
+            rosbagPath={fileState ? fileState.path : null}
           />
 
           {/* Graph Canvas */}
