@@ -18,7 +18,7 @@ function CalibrationPanels(props) {
       visible={props.visible}
     >
       <Rect
-        width={200}
+        width={230}
         height={70}
         fill="orange"
         cornerRadius={10}
