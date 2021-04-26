@@ -1,6 +1,6 @@
 {
   "name": "mcav",
-  "productName": "mcav",
+  "productName": "Multisensor Calibration and Visualization Software",
   "version": "1.0.0",
   "description": "My Electron application description",
   "main": ".webpack/main",
