@@ -29,6 +29,10 @@ const CreateGraph = (props) => {
   const [topic, setTopic] = useState("null");
   const [calibrationGraph, setCalibrationGraph] = useState(INITIAL_GRAPH);
 
+  // ref to make saveGraph work, TODO seek better solution
+  const graphRef = React.useRef();
+  graphRef.current = calibrationGraph;
+
   const stageRef = useRef(null);
   const layerRef = useRef(null);
 
@@ -60,6 +64,10 @@ const CreateGraph = (props) => {
   React.useEffect( () => {
     console.log("calibrations: ", calibrations || null);
   }, [calibrations]);
+
+  React.useEffect( () => {
+    console.log("graph: ", calibrationGraph || null);
+  }, [calibrationGraph]);
 
   React.useEffect( () => {
     console.log("bagTopics: ", bagTopics || null);
@@ -154,6 +162,12 @@ const CreateGraph = (props) => {
   }, []);
 
 
+  React.useEffect( () => {
+    api.receive("saveGraph", () => {
+      api.send("saveGraph", graphRef.current);
+    });
+  }, []);
+
   return (
     <div>
       <Stage
@@ -215,17 +229,19 @@ const CreateGraph = (props) => {
               stringPanel += " Error score: " + (Math.round(edge.errScore * Math.pow(10.0, 14.0)) / Math.pow(10.0, 14.0)).toString();
             }
 
-            return (
-            //if(edge.matrix != null) {
-            //var newMatrix = edge.matrix ? edge.matrix : [];
-              <CalibrationPanels
-                key={index}
-                x={edge.x}
-                y={edge.y}
-                matrix={stringPanel}
-                //visible={panelVisible}
-              />
-            );
+            if(edge && edge.x) {
+              return (
+                //if(edge.matrix != null) {
+                //var newMatrix = edge.matrix ? edge.matrix : [];
+                  <CalibrationPanels
+                    key={index}
+                    x={edge.x}
+                    y={edge.y}
+                    matrix={stringPanel}
+                    //visible={panelVisible}
+                  />
+                );
+            }
             //}
           })}
 
