@@ -10,13 +10,13 @@ function NodePanelKonva(props) {
         x={15}
         y={295}
         width={200}
-        height={250}
+        height={200}
         fill="gray"
         cornerRadius={10}
       />
       {/* NodePanel Header */}
       <Text
-        x={80}
+        x={85}
         y={270}
         fontSize={20}
         text="Panel"

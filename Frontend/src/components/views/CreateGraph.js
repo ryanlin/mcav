@@ -36,7 +36,6 @@ const CreateGraph = (props) => {
   var [circles, setCircles] = useState(INITIAL_STATE);
   var [connectors, setConnectors] = React.useState(INITIAL_STATE);
   var [fromShapeId, setFromShapeId] = React.useState(null);
-  var [displayID, setDisplayID] = React.useState("N/A");
 
   /* temp bandaids */
   const [spinnerVisible, setSpinnerVisible] = useState(false);
@@ -73,7 +72,7 @@ const CreateGraph = (props) => {
       id: "topicSelect",
       options: bagTopics,
       instruction: "Select Topic",
-      position: {top:567, left:30},
+      position: {top:460, left:30},
       property: "topic",
       onChange: (e) => setProperty(e, circles, fromShapeId, "topic")
     },
@@ -82,7 +81,7 @@ const CreateGraph = (props) => {
       id: "typeSelect",
       options: TEST_TYPES,
       instruction: "Select Type",
-      position: {top:587, left:30},
+      position: {top:490, left:30},
       property: "type",
       onChange: (e) => setProperty(e, circles, fromShapeId, "type")
     }
@@ -185,7 +184,6 @@ const CreateGraph = (props) => {
 
           {/*Konva Panel*/}
           <NodePanelKonva
-            displayID={displayID}
           />
 
           {/* Render Calibration Panels*/}
@@ -238,7 +236,7 @@ const CreateGraph = (props) => {
         type={"file"}
         style={{
           position: 'absolute',
-          top: 520,
+          top: 400,
           left: 30
         }}
         onChange={handleFileUpload}
@@ -260,7 +258,7 @@ const CreateGraph = (props) => {
         }}
         style={{
           position: 'absolute',
-          top: 543,
+          top: 430,
           left: 30
         }}
         disabled={importDisabled}
@@ -306,8 +304,8 @@ const CreateGraph = (props) => {
           borderRadius: "12px",
           color: "white",
           position: 'absolute',
-          top: 617,
-          left: 63
+          top: 525,
+          left: 57
         }}
         >
           Calibrate!
@@ -325,7 +323,7 @@ const CreateGraph = (props) => {
           />
       </button>
 
-      <button
+      {/* <button
         onClick={() => {
           const fileData = JSON.stringify(calibrationGraph, null, 4);
           const blob = new Blob([fileData], {type: "text/plain"});
@@ -342,7 +340,7 @@ const CreateGraph = (props) => {
         }}
         >
           Save Graph
-      </button>
+      </button> */}
     </div>
   );
 };

@@ -9,7 +9,7 @@ function Toolbar(props) {
     {
       key: 0,
       id: "clear-canvas-option",
-      x: 65,
+      x: 50,
       y: 50,
       value: "Clear Canvas",
       onClick: (e) => clearCanvas(e, props.setNodes, props.setEdges, props.setCalibrations)
@@ -17,7 +17,7 @@ function Toolbar(props) {
     {
       key: 1,
       id: "clear-edges-option",
-      x: 70,
+      x: 56,
       y: 95,
       value: "Clear Edges",
       onClick: (e) => clearEdges(e, props.setEdges, props.setCalibrations)
