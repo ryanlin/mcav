@@ -25,7 +25,7 @@ var topicList = [];
 const CreateGraph = (props) => {
   const [calibrations, setCalibrations] = useState(INITIAL_STATE);
   const [bagTopics, setBagTopics] = useState(INITIAL_STATE);
-  const [fileState, setFileState] = useState("null");
+  const [fileState, setFileState] = useState(null);
   const [topic, setTopic] = useState("null");
   const [calibrationGraph, setCalibrationGraph] = useState(INITIAL_GRAPH);
 
@@ -242,10 +242,13 @@ const CreateGraph = (props) => {
         id={"import-bag-button"}
         onClick={(e) => {
           console.log("rosbag clicked");
-          // bandaid disable button
-          setImportDisabled(true);
-          setImportSpinnerVisible(true);
-          api.rosbag("rosbag", fileState.path);
+          console.log(fileState);
+          if(fileState !== null) {
+            // bandaid disable button
+            setImportDisabled(true);
+            setImportSpinnerVisible(true);
+            api.rosbag("rosbag", fileState.path);
+          }    
         }}
         style={{
           position: 'absolute',
