@@ -28,7 +28,7 @@ function loadGraph(window) {
       const jsonData = JSON.parse(rawData);
 
       // Invalid file hotfix, TODO seek better solution
-      if ( jsonData.nodes !== null ) {
+      if ( jsonData.nodes === null && jsonData.edges === null) {
         dialog.showErrorBox("Invalid File", "The file being imported is not in the proper format to be loaded.")
       } else {
         // send jsonData for preload.js to take to renderer
