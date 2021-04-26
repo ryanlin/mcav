@@ -5,7 +5,7 @@ const { type } = require('os');
 
 // setup receiver from renderer for getGraph
 ipcMain.on("saveGraph", (e, graph) => {
-  writeToFile(graph, "untitled", ".json");
+  writeToFile(graph, "untitled", ".mcav");
 });
 
 function saveGraph(window) {
@@ -18,22 +18,33 @@ function loadGraph(window) {
   // Open dialog to choose file
   dialog.showOpenDialog({
     properties: ['openFile'],
-    filters: [ {name: 'Graphs', extensions: ['json']} ]
+    filters: [ {name: 'Graphs', extensions: ['mcav']} ]
   })
   .then(function(fileObj) {
     // the fileObj has two props
     if (!fileObj.canceled) {
       const filePath = path.resolve(__dirname, fileObj.filePaths[0]);
-      const rawData = fs.readFileSync(filePath);
-      const jsonData = JSON.parse(rawData);
 
-      // Invalid file hotfix, TODO seek better solution
-      if ( (jsonData.nodes === undefined) && (jsonData.edges === undefined) ) {
+      const ext = fpath.split('.').pop(); // file extensiom
+
+      console.log(ext);
+
+      // Hotfix: check file type and if it has necesesary stuff before sending
+      // TODO: seek if there is better solution
+      if ( (ext === "mcav") ) {
+        const rawData = fs.readFileSync(filePath);
+        const jsonData = JSON.parse(rawData);
+
+        if ( (jsonData.nodes === undefined) && (jsonData.edges === undefined) ) {
+          // send jsonData for preload.js to take to renderer
+          window.webContents.send('loadGraph', jsonData);
+        } else {
+          console.log("invalid");
+          dialog.showErrorBox("Invalid File", "The file being imported is invalid.");
+        }
+      } else {
         console.log("invalid");
         dialog.showErrorBox("Invalid File", "The file being imported is invalid.");
-      } else {
-        // send jsonData for preload.js to take to renderer
-        window.webContents.send('loadGraph', jsonData);
       }
     }
   })
