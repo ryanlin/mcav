@@ -12,7 +12,11 @@ For detailed documentation, please visit the [wiki page](https://github.com/ryan
 
 ## Install Dev Dependencies:
 
-`yarn`
+```
+yarn
+python -m pip install --upgrade pip
+pip install -r Backend/calibration_service/requirements.txt
+```
 
 ## Start App in Development Mode
 
