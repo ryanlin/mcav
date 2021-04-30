@@ -18,7 +18,7 @@ python -m pip install --upgrade pip
 pip install -r Backend/calibration_service/requirements.txt
 ```
 
-## Start App in Development Mode
+## Start App
 
 `yarn start`
 
