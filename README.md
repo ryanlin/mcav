@@ -8,9 +8,9 @@ For detailed documentation, please visit the [wiki page](https://github.com/ryan
 - npm ~ (`sudo apt install npm`)
 - yarn ~ (`npm install --global yarn`)
 
-**Note:** Make sure you are in the mcav/ directory for the follow steps
-
 ## Install Dev Dependencies:
+
+**Note:** Make sure you are in the mcav/ directory for the follow steps
 
 ```
 yarn
