@@ -2,7 +2,8 @@ import numpy as np
 
 
 def quaternion_to_matrix(quaternion: np.ndarray) -> np.ndarray:
-    """
+    """Convert a quaternion into a 3x3 rotation matrix
+
     quaternion (an array of 4 elements)
     in this order: [qx, qy, qz, qw]
     """

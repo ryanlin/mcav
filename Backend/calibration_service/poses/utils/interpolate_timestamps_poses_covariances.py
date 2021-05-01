@@ -4,7 +4,6 @@ import numpy as np
 from typing import Optional, Tuple
 
 
-# TODO (eduong@nevada.unr.edu): write automated test for this function
 def interpolate_timestamps_poses_covariances(timestamp_target: np.ndarray,
                                              timestamp_interp: np.ndarray,
                                              poses: np.ndarray,
@@ -17,23 +16,30 @@ def interpolate_timestamps_poses_covariances(timestamp_target: np.ndarray,
     interp_covariances = []
     interp_timestamp = []
 
-    h = 0
-    i = 0
-    j = 1
+    h = 0  # tracking target timestamp
+    i = 0  # tracking begin of timestamp to be interpolated
+    j = 1  # tracking end of timestamp to be interpolated
     while j < len(timestamp_interp) and h < len(timestamp_target):
+        # If target timestamp is behind, move to next target timestamp
         if timestamp_target[h] < timestamp_interp[i]:
             h += 1
+
+        # If interpolating timestamps are behind, move to next pair of timestamps
         elif timestamp_target[h] > timestamp_interp[j]:
             i += 1
             j += 1
+
+        # Interpolate pair of timestamps to the target timestamp
         else:
-            # Compute t between two timestamps
             timeLength = timestamp_interp[j] - timestamp_interp[i]
+
+            # If there are duplicating timestamps, move to next pair of timestamps
             if timeLength == 0.0:
                 i += 1
                 j += 1
                 continue
 
+            # Compute t between two timestamps
             timeInterval = timestamp_target[h] - timestamp_interp[i]
             t = float(timeInterval) / float(timeLength)
 
@@ -75,6 +81,7 @@ def interpolate_timestamps_poses_covariances(timestamp_target: np.ndarray,
 
 
 def __interpolate_pose(pose1: np.ndarray, pose2: np.ndarray, t: float) -> np.ndarray:
+    """Interpolate two poses."""
     assert pose1.shape == (4, 4)
     assert pose2.shape == (4, 4)
 
@@ -82,6 +89,7 @@ def __interpolate_pose(pose1: np.ndarray, pose2: np.ndarray, t: float) -> np.nda
 
 
 def __interpolate_covariance(cov1: np.ndarray, cov2: np.ndarray, t: float) -> np.ndarray:
+    """Interpolate two covariance matrices"""
     assert type(cov1) is type(cov2)
     assert t >= 0.0 and t <= 1.0
 
@@ -90,15 +98,16 @@ def __interpolate_covariance(cov1: np.ndarray, cov2: np.ndarray, t: float) -> np
     elif isinstance(cov1, float):
         return (1 - t) * cov1 + t * cov2
     else:
-        print("Covariance can only be float or numpy array")
-        raise
+        raise ValueError("Covariance can only be float or numpy array")
 
 
 def __log_covariance(cov: np.ndarray) -> np.ndarray:
+    """Compute log of covariance matrix"""
     w, v = np.linalg.eig(cov)
     return v @ np.diag(np.log(w)) @ v.T
 
 
 def __exp_covariance(algebra: np.ndarray) -> np.ndarray:
+    """Compute exp of covariance matrix"""
     w, v = np.linalg.eig(algebra)
     return v @ np.diag(np.exp(w)) @ v.T

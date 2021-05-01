@@ -3,6 +3,7 @@ import numpy as np
 
 
 def adjoint(T: np.ndarray) -> np.ndarray:
+    """Construct adjoint matrix from SE3 matrix."""
     assert T.shape == (4, 4)
 
     R = T[0:3, 0:3].copy()

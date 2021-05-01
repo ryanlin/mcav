@@ -2,6 +2,7 @@ import numpy as np
 
 
 def inverse(R: np.ndarray):
+    """Returns inverse of SO3 matrix"""
     assert R.shape == (3, 3)
     return R.T.copy()
 
