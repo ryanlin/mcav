@@ -8,7 +8,11 @@ from typing import Optional, Tuple
 
 
 class Poses:
-    """Stores pose information in right-hand convention."""
+    """Stores pose information in right-hand convention.
+
+    IMPORTANT: Poses must follow the right-hand convention.
+    See https://gtsam.org/2021/02/23/uncertainties-part2.html for more information.
+    """
 
     def __init__(self, timestamps: np.ndarray, poses: np.ndarray, covariances: Optional[np.ndarray] = None):
         self.timestamps = timestamps
@@ -152,5 +156,6 @@ class Poses:
         return motion, motion_cov
 
     def __relative_poses(self) -> np.ndarray:
+        """Express poses in the frame of the first pose instead of in the world frame"""
         T1_inv = SE3.inverse(self.poses[0])
         return np.array([T1_inv @ pose for pose in self.poses])

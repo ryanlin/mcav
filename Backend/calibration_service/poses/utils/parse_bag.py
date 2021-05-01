@@ -7,9 +7,7 @@ from typing import Tuple
 
 
 def parse_bag(topic: str, bag_file_path: str) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """
-    Parse rosbag to obtain timestamp, transforms, and covariances.
-    """
+    """Parse rosbag to obtain timestamp, transforms, and covariances."""
     # Parse rosbag
     df_pose = pd.read_csv(
         bagreader(bag_file_path, verbose=False).message_by_topic(topic))

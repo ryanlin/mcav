@@ -2,6 +2,7 @@ import numpy as np
 
 
 def inverse(T: np.ndarray):
+    """Returns inverse of SE3."""
     assert T.shape == (4, 4)
 
     R = T[0:3, 0:3].copy()

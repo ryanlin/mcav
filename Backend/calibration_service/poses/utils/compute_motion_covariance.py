@@ -4,6 +4,7 @@ from .lie_groups import SE3
 
 
 def compute_motion_covariance(T1: np.ndarray, T2: np.ndarray, cov1: np.ndarray, cov2: np.ndarray) -> np.ndarray:
+    """Compute relative motion covariance between the covariances of two poses."""
     assert T1.shape == (4, 4)
     assert T2.shape == (4, 4)
     assert cov1.shape == (6, 6)
