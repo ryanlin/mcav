@@ -40,13 +40,7 @@ contextBridge.exposeInMainWorld(
     		calibration(inputGraph);
     	}
 	},
-	saveGraph: (channel, jsonPath) => {
-		let validChannels = ["saveGraph"];
-		if( validChannels.includes(channel)) {
-			saveGraph(jsonPath);
-		}
-	},
-	send: (channel, data) => {
+	saveGraph: (channel, data) => {
 		const validChannels = ["saveGraph"];
 		if( validChannels.includes(channel) ) {
 			ipcRenderer.send(channel, data);
@@ -129,7 +123,6 @@ function findTopics(results)
 function calibration(inputGraph) {
 
 	var jsonStr = JSON.stringify(inputGraph);
-	//console.log("Passed Graph: \n" + jsonStr);
 
 	if( inputGraph.numberOfNodes == undefined || inputGraph.numberOfNodes <= 1 || inputGraph.numberOfEdges == 0)
 	{
@@ -158,27 +151,13 @@ function calibration(inputGraph) {
 				var calResult = JSON.parse(results[0]);
 
 				ipcRenderer.send("calibration", calResult);
-
-				//Gets list of returned edges//
-				var edgeResults = [];
-				for( var i = 0; i < results.length; i++ ) {
-				  edgeResults.push( results[i] );
-				}
-
-				edgeResults[0] = edgeResults[0].replaceAll("\'", "\"");
-				edgeResults[0] = edgeResults[0].replaceAll("True", "true");
-				edgeResults[0] = edgeResults[0].replaceAll("False", "false");
-
-				var matr = edgeResults[0];
-
-				backendGraph = JSON.parse(matr);
-       	createFullGraph();
 			}
 		});
 	}
 }
 
 //Merges back-end results to front-end graph//
+//CURRENTLY NOT USED//
 function createFullGraph() {
 
 	fullGraph = JSON.parse(JSON.stringify(frontendGraph));
@@ -190,6 +169,7 @@ function createFullGraph() {
 }
 
 //Calls back-end script to save the full graph json string to a file//
+//CURRENTLY NOT USED//
 function saveGraph(jsonPath) {
 
 	let options = {

@@ -2,7 +2,6 @@ import React from "react";
 import { Rect, Text, Stage, Layer, Circle, Arrow, Group, Line, Label, Tag} from 'react-konva';
 const {api} = window;
 
-
 function CalibrationPanels(props) {
   return (
     <Group
@@ -11,7 +10,6 @@ function CalibrationPanels(props) {
       x={props.x}
       y={props.y}
       onDblClick={() => {
-        //navigator.clipboard.writeText(props.matrix.join());
         navigator.clipboard.writeText(props.matrix);
         alert("Matrix Copied");
       }}
@@ -27,7 +25,6 @@ function CalibrationPanels(props) {
         fontSize={14}
         text={"test"}
         text={props.matrix}
-        //test={props.matrix}
       />
     </Group>
   )
@@ -35,6 +32,7 @@ function CalibrationPanels(props) {
 
 //Event handler for clicking the calibrate button//
 function onClickCalibrate(e, circles, connectors, setCalibrations, setPanelVisible, setSpinnerVisible) {
+  //Create json graph variable to be calibrated in the backend//
   var fullGraph = {
     numberOfNodes: circles.length,
     numberOfEdges: connectors.length,
@@ -50,7 +48,6 @@ function onClickCalibrate(e, circles, connectors, setCalibrations, setPanelVisib
 
   enableCalibrationListener(e, circles, connectors, setCalibrations, setPanelVisible, setSpinnerVisible);
 
-  //console.log(fullGraph);
   api.calibration("calibration", fullGraph);
 }
 
@@ -111,20 +108,13 @@ function mergeCalibrationOutputs(edgeList, calibrationOutput) {
 
 //Calculates the position to render a calibration pannel to the GUI//
 function returnMatrixPosition(node1, node2) {
-  var slope = getSlope(node1.x, node1.y, node2.x, node2.y);
   var midpoint = getMidpoint(node1.x, node1.y, node2.x, node2.y);
   var position = midpoint;
+
+  //Render center of calibration panel to center of edge//
+  //TO DO: Dynamically change position based on panel's width and height//
   position.x -= 100;
   position.y -= 35;
-  /*if( slope > 0 ) {
-    position.x -= 40;
-  }
-  else if( slope < 0 ) {
-    position.x += 40;
-  }
-  else {
-    position.y += 40;
-  }*/
   return position;
 }
 
@@ -137,6 +127,7 @@ function getMidpoint(x1, y1, x2, y2) {
 }
 
 //Calculates the slope between two points//
+//CURRENTLY NOT USED//
 function getSlope(x1, y1, x2, y2) {
     var slope = (y2 - y1) / (x2 - x1);
     return slope;

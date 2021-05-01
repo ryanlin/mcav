@@ -113,7 +113,7 @@ const CreateGraph = (props) => {
       console.log(ext);
 
       if ( ext === "bag") {
-        setFileState(e.target.files[0]);      
+        setFileState(e.target.files[0]);
       } else {
         alert("The chosen file is invalid. \nPlease choose a different type. \nAccepted file extensions: .bag)");
       }
@@ -135,7 +135,7 @@ const CreateGraph = (props) => {
       setFileState({
         path: bagPath
       })
-      console.log(bagPath);      
+      console.log(bagPath);
       api.rosbag("rosbag", bagPath);
     });
   }, []);
@@ -168,10 +168,9 @@ const CreateGraph = (props) => {
     });
   }, []);
 
-
   React.useEffect( () => {
     api.receive("saveGraph", () => {
-      api.send("saveGraph", graphRef.current);
+      api.saveGraph("saveGraph", graphRef.current);
     });
   }, []);
 
@@ -214,6 +213,7 @@ const CreateGraph = (props) => {
             }
             var newMatrix = [];
             var stringPanel = "  ";
+            // Format text for calibration panel
             if( edge.matrix != null ) {
               newMatrix = edge.matrix;
               for( var i = 1; i <= newMatrix.length; i++ ) {
@@ -238,18 +238,14 @@ const CreateGraph = (props) => {
 
             if(edge && edge.x) {
               return (
-                //if(edge.matrix != null) {
-                //var newMatrix = edge.matrix ? edge.matrix : [];
-                  <CalibrationPanels
-                    key={index}
-                    x={edge.x}
-                    y={edge.y}
-                    matrix={stringPanel}
-                    //visible={panelVisible}
-                  />
-                );
+                <CalibrationPanels
+                  key={index}
+                  x={edge.x}
+                  y={edge.y}
+                  matrix={stringPanel}
+                />
+              );
             }
-            //}
           })}
 
         </Layer>
@@ -278,7 +274,7 @@ const CreateGraph = (props) => {
             setImportDisabled(true);
             setImportSpinnerVisible(true);
             api.rosbag("rosbag", fileState.path);
-          }    
+          }
         }}
         style={{
           position: 'absolute',
@@ -347,24 +343,6 @@ const CreateGraph = (props) => {
           />
       </button>
 
-      {/* <button
-        onClick={() => {
-          const fileData = JSON.stringify(calibrationGraph, null, 4);
-          const blob = new Blob([fileData], {type: "text/plain"});
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.download = 'filename.json';
-          link.href = url;
-          link.click();
-        }}
-        style={{
-          position: 'absolute',
-          top: 677,
-          left: 79
-        }}
-        >
-          Save Graph
-      </button> */}
     </div>
   );
 };
