@@ -14,6 +14,7 @@ function saveGraph(window) {
   window.webContents.send("saveGraph");
 }
 
+// Loads the user passed MCaV file and renders the components on the graph //
 function loadGraph(window) {
   // Open dialog to choose file
   dialog.showOpenDialog({
